@@ -1,4 +1,4 @@
-package App;
+package Gella.Tailor_assistant.app;
 
 import java.awt.EventQueue;
 import java.text.*;

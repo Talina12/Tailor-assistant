@@ -1,4 +1,4 @@
-package Gella.Tailor_assistant.App;
+package Gella.Tailor_assistant.app;
 
 import java.awt.EventQueue;
 //import java.sql.SQLException;
