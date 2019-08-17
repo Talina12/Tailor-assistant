@@ -29,8 +29,7 @@ import Gella.Tailor_assistant.model.*;
  *
  */
 public class DbHandler {
- 
-	
+    
 	/**
 	 * The object in which the database connection will be stored
 	 */
