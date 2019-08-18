@@ -3,8 +3,9 @@ package Gella.Tailor_assistant.controller;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.SQLException;
-import java.util.Collections;
+import java.util.*;
 import java.util.logging.Logger;
+
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
@@ -17,6 +18,7 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.Lists;
 import com.google.api.client.util.store.DataStoreFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
+import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.*;
 
@@ -50,9 +52,7 @@ public class GoogleCalendarController {
 	  private static Credential authorize() throws Exception {
 	    // load client secrets
 	    GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY,
-	        new InputStreamReader(GoogleCalendarController.class.getResourceAsStream("\Users\ura\eclipse-workspace\Tailor-assistantC:\Users\ura\eclipse-workspace\Tailor-assistant\client_secrets.json")));
-	    log.info("GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY,\r\n" + 
-	    		"	        new InputStreamReader(GoogleCalendarController.class.getResourceAsStream(\"/client_secrets.json\")))");
+	        new InputStreamReader(GoogleCalendarController.class.getResourceAsStream("/client_secrets.json")));
 	    if (clientSecrets.getDetails().getClientId().startsWith("Enter")
 	        || clientSecrets.getDetails().getClientSecret().startsWith("Enter ")) {
 	      System.out.println(
@@ -100,17 +100,29 @@ public class GoogleCalendarController {
 
 	 /**
 	  * creates calendar "Tailor" if it not exist
-	  * @return created calendar
+	  * @return created calendar or existing calendar
 	  * @throws IOException if failed to create
 	  */
 	  public Calendar addCalendarIfNotExist() throws IOException {
 		    log.info("Add Calendar");
+		    CalendarList calendarList = client.calendarList().list().execute();
+		    if (calendarList.getItems()!=null) {
+		    	Iterator calendarListIterator = calendarList.getItems().listIterator();
+		    	while (calendarListIterator.hasNext())
+		    }
+		    try {
 		    CalendarListEntry calendarListEntry = client.calendarList().get(CALENDAR_NAME).execute();
-		    System.out.println("ID: " + calendarListEntry.getId());
-		    System.out.println("Summary: " + calendarListEntry.getSummary());
-		    Calendar entry = new Calendar();
-		    entry.setSummary("Tailor calendar");
-		    Calendar result = client.calendars().insert(entry).execute();
-		    return result;
+		   // Calendar result =client.calendars().get(calendarListEntry.getId()).execute();
+		   //GoogleCalendarController Calendar result = client.calendars().get(CALENDAR_NAME).execute();
+		   // return result;
+		    return null;
+		     }catch ( com.google.api.client.googleapis.json.GoogleJsonResponseException e)
+		       {
+		        log.severe(e.getMessage()+ " GoogleJsonResponseException in GoogleCalendarController.addCalendarIfNotExist()");
+		        Calendar entry = new Calendar();
+			    entry.setSummary(CALENDAR_NAME);
+			    Calendar result = client.calendars().insert(entry).execute();
+			    return result;
+		       }
 		  }	  
 }
