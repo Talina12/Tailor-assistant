@@ -28,7 +28,7 @@ public class GoogleCalendarController {
 	
 	/** Directory to store user credentials. */
 	  private static final java.io.File DATA_STORE_DIR =
-	      new java.io.File(System.getProperty("user.home"), ".store/"+APPLICATION_NAME);
+	      new java.io.File(System.getProperty("user.dir"), ".store/"+APPLICATION_NAME);
 	  
 	  /**
 	   * Global instance of the {@link DataStoreFactory}. The best practice is to make it a single
@@ -50,8 +50,7 @@ public class GoogleCalendarController {
 	  private static Credential authorize() throws Exception {
 	    // load client secrets
 	    GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY,
-	        new InputStreamReader(GoogleCalendarController.class.getResourceAsStream("/client_secrets.json")));
-	    System.out.println("SSSSS");
+	        new InputStreamReader(GoogleCalendarController.class.getResourceAsStream("\Users\ura\eclipse-workspace\Tailor-assistantC:\Users\ura\eclipse-workspace\Tailor-assistant\client_secrets.json")));
 	    log.info("GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY,\r\n" + 
 	    		"	        new InputStreamReader(GoogleCalendarController.class.getResourceAsStream(\"/client_secrets.json\")))");
 	    if (clientSecrets.getDetails().getClientId().startsWith("Enter")
@@ -85,10 +84,10 @@ public class GoogleCalendarController {
 		      
 	      }catch (IOException e) {
 	          //System.err.println(e.getMessage());
-	    	  log.severe(e.getMessage());
+	    	  log.severe(e.getMessage()+"IOException");
 	      }catch (Throwable t) {
 	         // t.printStackTrace();
-	    	  log.severe(t.getMessage());
+	    	  log.severe(t.getMessage()+"Throwable");
 	      }
          
 	  }
