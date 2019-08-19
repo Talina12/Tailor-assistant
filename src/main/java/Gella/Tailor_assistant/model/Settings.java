@@ -17,6 +17,11 @@ import java.util.GregorianCalendar;
  */
  private static Date[][] weekShedule; 
  private static Settings instance = null;
+ private static final String  CON_STR="jdbc:sqlite:./tailor.db";
+ private static final String APPLICATION_NAME = "Tailor";
+ private static final String CALENDAR_NAME = "Tailor calendar";
+ private static final java.io.File DATA_STORE_DIR =
+	      new java.io.File(System.getProperty("user.dir"), ".store/"+APPLICATION_NAME);
  
  public static synchronized Settings getInstance() throws SQLException {
      if (instance == null)
@@ -27,6 +32,7 @@ import java.util.GregorianCalendar;
  public Settings() {
 	 HOUR_RATING=100;
 	 weekShedule=new Date[7][2];
+	 
 	 Calendar calendar = new GregorianCalendar();
 	 calendar.set(Calendar.DAY_OF_WEEK, 1);
 	 calendar.set(Calendar.HOUR_OF_DAY, 8);
@@ -110,4 +116,25 @@ import java.util.GregorianCalendar;
 public Date getSheduleStart(int dayOfWeek) {
 	return weekShedule[dayOfWeek-1][0];
 }
+
+public static String getCON_STR() {
+	return CON_STR;
+}
+
+public static String getApplicationName() {
+	return APPLICATION_NAME;
+}
+
+public static String getCalendarName() {
+	return CALENDAR_NAME;
+}
+
+public static java.io.File getDataStoreDir() {
+	return DATA_STORE_DIR;
+}
+
+
+
+
+
 }

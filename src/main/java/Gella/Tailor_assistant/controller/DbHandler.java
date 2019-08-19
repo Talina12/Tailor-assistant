@@ -37,9 +37,10 @@ public class DbHandler {
 	/**
 	 * Constant in which the connection address is stored
 	 */
-	private static final String CON_STR = "jdbc:sqlite:./tailor.db";
+	private static String CON_STR ; 
 	private static DbHandler instance = null;
 	private String info;
+	private Settings settings;
 	 
 	public static synchronized DbHandler getInstance() throws SQLException {
         if (instance == null)
@@ -56,7 +57,9 @@ public class DbHandler {
     * @throws SQLException
     */
 	private DbHandler() throws SQLException {
-        // Register the driver
+        settings = Settings.getInstance();
+        CON_STR=settings.getCON_STR();
+		// Register the driver
         DriverManager.registerDriver(new JDBC());
         //connecting to the database
         this.connection = DriverManager.getConnection(CON_STR);

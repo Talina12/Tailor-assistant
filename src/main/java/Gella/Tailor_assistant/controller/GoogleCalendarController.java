@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.SQLException;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.logging.Logger;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
@@ -20,17 +20,20 @@ import com.google.api.client.util.store.DataStoreFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.Calendar;
+import com.google.api.services.calendar.model.CalendarList;
 import com.google.api.services.calendar.model.CalendarListEntry;
+
+import Gella.Tailor_assistant.model.Settings;
 
 
 public class GoogleCalendarController {
 	private static GoogleCalendarController instance = null;
-	private static final String APPLICATION_NAME = "Tailor";
-	private static final String CALENDAR_NAME = "Tailor";
+	private static final String APPLICATION_NAME= Settings.getApplicationName();
+	private static final String CALENDAR_NAME= Settings.getCalendarName(); 
+	private Calendar workingCalendar;
 	
 	/** Directory to store user credentials. */
-	  private static final java.io.File DATA_STORE_DIR =
-	      new java.io.File(System.getProperty("user.dir"), ".store/"+APPLICATION_NAME);
+	  private static final   java.io.File DATA_STORE_DIR= Settings.getDataStoreDir();
 	  
 	  /**
 	   * Global instance of the {@link DataStoreFactory}. The best practice is to make it a single
@@ -50,7 +53,7 @@ public class GoogleCalendarController {
 	  
 	  /** Authorizes the installed application to access user's protected data. */
 	  private static Credential authorize() throws Exception {
-	    // load client secrets
+		 // load client secrets
 	    GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY,
 	        new InputStreamReader(GoogleCalendarController.class.getResourceAsStream("/client_secrets.json")));
 	    if (clientSecrets.getDetails().getClientId().startsWith("Enter")
@@ -84,12 +87,12 @@ public class GoogleCalendarController {
 		      
 	      }catch (IOException e) {
 	          //System.err.println(e.getMessage());
-	    	  log.severe(e.getMessage()+"IOException");
+	    	  log.severe(e.getMessage()+" IOException");
 	      }catch (Throwable t) {
 	         // t.printStackTrace();
-	    	  log.severe(t.getMessage()+"Throwable");
+	    	  log.severe(t.getMessage()+" Throwable");
 	      }
-         
+		  client.f
 	  }
 	  
 	  public static synchronized GoogleCalendarController getInstance() throws SQLException {
@@ -104,27 +107,22 @@ public class GoogleCalendarController {
 	  * @throws IOException if failed to create
 	  */
 	  public Calendar addCalendarIfNotExist() throws IOException {
-		    log.info("Add Calendar");
-		List<CalendarListEntry> calendarList = client.calendarList().list().execute().getItems();
+		  CalendarList list =client.calendarList().list().execute();
+		    List<CalendarListEntry> calendarList = list.getItems();
 		    if (calendarList!=null) {
-		    	Iterator calendarListIterator = calendarList.listIterator();
+		    	ListIterator<CalendarListEntry> calendarListIterator = calendarList.listIterator();
+		    	CalendarListEntry listEentry;
 		    	while (calendarListIterator.hasNext()) {
-		    		
+		    		listEentry=calendarListIterator.next();
+     			if (listEentry.getSummary().equals(CALENDAR_NAME)) 
+		    	{ log.info(" the calendar exist");
+		    	return client.calendars().get(listEentry.getId()).execute();}
 		    	}
-		    }
-		    try {
-		    CalendarListEntry calendarListEntry = client.calendarList().get(CALENDAR_NAME).execute();
-		   // Calendar result =client.calendars().get(calendarListEntry.getId()).execute();
-		   //GoogleCalendarController Calendar result = client.calendars().get(CALENDAR_NAME).execute();
-		   // return result;
-		    return null;
-		     }catch ( com.google.api.client.googleapis.json.GoogleJsonResponseException e)
-		       {
-		        log.severe(e.getMessage()+ " GoogleJsonResponseException in GoogleCalendarController.addCalendarIfNotExist()");
-		        Calendar entry = new Calendar();
-			    entry.setSummary(CALENDAR_NAME);
-			    Calendar result = client.calendars().insert(entry).execute();
-			    return result;
-		       }
-		  }	  
+		    	}
+		    log.info("Add calendar"+" "+CALENDAR_NAME);
+		    Calendar entry = new Calendar();
+		    entry.setSummary(CALENDAR_NAME);
+		    Calendar result = client.calendars().insert(entry).execute();
+		    return result;
+		     }	  
 }
