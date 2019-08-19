@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 //import java.util.List;
+import java.util.List;
+import java.util.logging.Logger;
 
 import javax.swing.JOptionPane;
 
@@ -23,6 +25,7 @@ import Gella.Tailor_assistant.model.*;
 //import model.Order;
 //import model.OrderStatus;
 
+//TODO check all possible exceptions and display messages for user
 /**
  * class for working with a database
  * @author Gella
@@ -41,6 +44,7 @@ public class DbHandler {
 	private static DbHandler instance = null;
 	private String info;
 	private Settings settings;
+	Logger log;
 	 
 	public static synchronized DbHandler getInstance() throws SQLException {
         if (instance == null)
@@ -58,7 +62,7 @@ public class DbHandler {
     */
 	private DbHandler() throws SQLException {
         settings = Settings.getInstance();
-        CON_STR=settings.getCON_STR();
+        CON_STR=Settings.getCON_STR();
 		// Register the driver
         DriverManager.registerDriver(new JDBC());
         //connecting to the database
@@ -69,6 +73,7 @@ public class DbHandler {
         createDescriptionTable();
         createEventsTable();
         info =new String();
+        log=Logger.getLogger("Gella.Tailor_assistant.controller.DbHandler");
         }
    
 	/**
@@ -176,13 +181,14 @@ public class DbHandler {
      private void addEvent(Event e) {
     	 try {
  			PreparedStatement statement = this.connection.prepareStatement(
- 			         "INSERT INTO Events(`id_order`,`start`,`duration`,`name`) " +
- 			          "VALUES(?,?,?,?)") ;
+ 			         "INSERT INTO Events(`id_order`,`start`,`duration`,`name`,`id_google`) " +
+ 			          "VALUES(?,?,?,?,?)") ;
  			statement.setInt(1, e.getOrderId());
  			java.sql.Date rd = new java.sql.Date(e.getStart().getTime());
  			statement.setDate(2,rd);
  			statement.setDouble(3, e.getDuration());
  			statement.setString(4, e.getName());
+ 			statement.setString(5, e.getGoogleId());
  			statement.execute();
  			 }
              catch (SQLException exep) {
@@ -608,9 +614,10 @@ public void createEventsTable() {
 	 String sqiStat = "CREATE TABLE IF NOT EXISTS Events (\n"
 		     +  "id integer PRIMARY KEY,\n"
              +  "id_order integer NOT NULL,\n"
+		     +  "id_google string, \n"
 		     +  "start integer,\n"
              +  "duration integer,\n"
-		     +  "name, string , \n"
+		     +  "name string , \n"
              + "FOREIGN KEY (id_order) REFERENCES Orders(id))";
 	try {
 		Statement stmt = connection.createStatement();
@@ -623,6 +630,55 @@ public void createEventsTable() {
         
 }
 
+public ArrayList<Event> getEventsByGoogleId(String id) {
+	String sql = "SELECT id, id_order, id_google, start, duration, name FROM Events "
+	 		+ " WHERE id_google LIKE ?";
 
+try ( PreparedStatement stat  = this.connection.prepareStatement(sql)){
+// set the value
+stat.setString(1,id);
+ResultSet rs  = stat.executeQuery();
+// loop through the result set
+ArrayList<Event> data= new ArrayList<Event>();
+while (rs.next()) {
+   Event ev = new Event();
+   ev.setId(rs.getInt("id"));
+   ev.setOrderId(rs.getInt("id_order"));
+   ev.setGoogleId(rs.getString("id_google"));
+   ev.setStart(rs.getDate("start"));
+   ev.setDuration(rs.getDouble("duration"));
+   ev.setName(rs.getString("name"));
+   data.add(ev);
+}
+return data; 
+} catch (SQLException e) {
+log.severe(e.getMessage()+"  "+ e.getClass().toString());
+}
+return null;
+}
+
+ArrayList<Event> getEvents(){
+ String sql= "SELECT id, id_order, id_google, start, duration, name FROM Events ORDER BY id";
+ try (Statement statement = this.connection.createStatement()) {
+   //  upload to ArrayList orders obtained from the database.
+   ArrayList<Event> events = new ArrayList<Event>();
+   ResultSet resultSet = statement.executeQuery(sql);
+   while (resultSet.next()) {
+   Event ev= new Event();
+   nc[0]=String.valueOf(resultSet.getInt("id"));
+            nc[1]= resultSet.getString("first_name");
+            nc[2]=resultSet.getString("last_name");  
+            nc[3]=resultSet.getString("cellphone");
+            nc[4]=resultSet.getString("home_phone");
+            customers.add(nc);
+            }
+        return customers.toArray(new String[customers.size()][Customer.getTitles().length]);
+
+    } catch (SQLException e) {
+ 	   System.out.println("error in selecl all customers function");
+        e.printStackTrace();
+        return null;
+    }	
+}
 }
 
