@@ -45,7 +45,7 @@ public class DbHandler {
 	private String info;
 	Logger log;
 	 
-	public static synchronized DbHandler getInstance() throws SQLException {
+	public static synchronized DbHandler getInstance()  {
         if (instance == null)
             instance = new DbHandler();
         return instance;
@@ -59,8 +59,9 @@ public class DbHandler {
     * @see DbHandler#createOrderTable()
     * @throws SQLException
     */
-	private DbHandler() throws SQLException {
-        CON_STR=Settings.getCON_STR();
+	private DbHandler(){
+        try {
+		CON_STR=Settings.getCON_STR();
 		// Register the driver
         DriverManager.registerDriver(new JDBC());
         //connecting to the database
@@ -72,6 +73,10 @@ public class DbHandler {
         createEventsTable();
         info =new String();
         log=Logger.getLogger("Gella.Tailor_assistant.controller.DbHandler");
+        }catch(SQLException s){
+          log.severe(s.getMessage()+"  "+s.getClass().toString());
+          JOptionPane.showMessageDialog(null,s.getClass().toString()+"unable to connect to database");
+        }
         }
    
 	/**
@@ -123,7 +128,7 @@ public class DbHandler {
      * adds an order to the database
      * @param order 
      */
-    public void addOrder(Order order) {
+    public int addOrder(Order order) {
        // prepare the INSERT statement
        try (PreparedStatement statement = this.connection.prepareStatement(
                        "INSERT INTO Orders(`id_customer`, `rec_date`,`description`,"
@@ -170,17 +175,19 @@ public class DbHandler {
             {e.setOrderId(orderId);
              addEvent(e);
             }
+           return orderId;
        } catch (SQLException e) {
     	   JOptionPane.showMessageDialog(null,e.getClass().toString()+"Error in DbHandler.addOrder");
     	   e.printStackTrace();
        }
+	return 0;
    }
    
      private void addEvent(Event e) {
     	 try {
  			PreparedStatement statement = this.connection.prepareStatement(
- 			         "INSERT INTO Events(`id_order`,`start`,`duration`,`name`,`id_google`, `description`) " +
- 			          "VALUES(?,?,?,?,?,?)") ;
+ 			         "INSERT INTO Events(`id_order`,`start`,`duration`,`name`,`id_google`, "
+ 			         + "`description`, `color_id`)  VALUES(?,?,?,?,?,?,?)") ;
  			statement.setInt(1, e.getOrderId());
  			java.sql.Date rd = new java.sql.Date(e.getStart().getTime());
  			statement.setDate(2,rd);
@@ -188,6 +195,7 @@ public class DbHandler {
  			statement.setString(4, e.getName());
  			statement.setString(5, e.getGoogleId());
  			statement.setString(6, e.getDescription());
+ 			statement.setString(7, e.getColorId());
  			statement.execute();
  			 }
              catch (SQLException exep) {
@@ -617,7 +625,8 @@ public void createEventsTable() {
 		     +  "start integer,\n"
              +  "duration integer,\n"
 		     +  "name string , \n"
-		     +  "description string   \n"
+		     +  "description string, \n"
+		     +  "color_id,  \n"
              + "FOREIGN KEY (id_order) REFERENCES Orders(id))";
 	try {
 		Statement stmt = connection.createStatement();
@@ -631,7 +640,7 @@ public void createEventsTable() {
 }
 
 public ArrayList<Event> getEventsByGoogleId(String id) {
-	String sql = "SELECT id, id_order, id_google, start, duration, name, description FROM Events "
+	String sql = "SELECT id, id_order, id_google, start, duration, name, description, color_id FROM Events "
 	 		+ " WHERE id_google LIKE ?";
 
 try ( PreparedStatement stat  = this.connection.prepareStatement(sql)){
@@ -649,6 +658,7 @@ while (rs.next()) {
    ev.setDuration(rs.getLong("duration"));
    ev.setName(rs.getString("name"));
    ev.setDescription(rs.getString("description"));
+   ev.setColorId(rs.getString("color_id"));
    data.add(ev);
 }
 return data; 
@@ -659,7 +669,7 @@ return null;
 }
 
 ArrayList<Event> getEvents(){
- String sql= "SELECT id, id_order, id_google, start, duration, name, description FROM Events ORDER BY id";
+ String sql= "SELECT id, id_order, id_google, start, duration, name, description, color_id FROM Events ORDER BY id";
  try (Statement statement = this.connection.createStatement()) {
    //  upload to ArrayList orders obtained from the database.
    ArrayList<Event> events = new ArrayList<Event>();
@@ -673,6 +683,7 @@ ArrayList<Event> getEvents(){
      ev.setDuration(resultSet.getLong("duration"));
      ev.setName(resultSet.getString("name"));
      ev.setDescription(resultSet.getString("description"));
+     ev.setColorId(resultSet.getString("color_id"));
      events.add(ev);
    }
    return events;
@@ -685,7 +696,7 @@ ArrayList<Event> getEvents(){
 
 public void updateEvent(Event lev) {
 	// TODO Auto-generated method stub
- String sql = "UPDATE events SET id_google = ? ,start = ?, duration=?, name=?, description=? WHERE id = ?";
+ String sql = "UPDATE events SET id_google = ? ,start = ?, duration=?, name=?, description=?, color_id=? WHERE id = ?";
  PreparedStatement pstmt;
 try {
 	pstmt = this.connection.prepareStatement(sql);
@@ -695,11 +706,42 @@ try {
 	pstmt.setLong(3, lev.getDuration());
 	pstmt.setString(4, lev.getName());
 	pstmt.setString(5, lev.getDescription());
+	pstmt.setString(6, lev.getColorId());
+	pstmt.setInt(7, lev.getId());
 	pstmt.executeUpdate();
     } catch (SQLException e) {
 	   // TODO Auto-generated catch block
 	  e.printStackTrace();
 }	 
+}
+
+public ArrayList<Event> getEventsByOrderId(int id) {
+	String sql = "SELECT id, id_order, id_google, start, duration, name, description, color_id "
+			+ "FROM Events  WHERE id_order LIKE ?";
+
+try ( PreparedStatement stat  = this.connection.prepareStatement(sql)){
+// set the value
+stat.setInt(1,id);
+ResultSet rs  = stat.executeQuery();
+// loop through the result set
+ArrayList<Event> data= new ArrayList<Event>();
+while (rs.next()) {
+   Event ev = new Event();
+   ev.setId(rs.getInt("id"));
+   ev.setOrderId(rs.getInt("id_order"));
+   ev.setGoogleId(rs.getString("id_google"));
+   ev.setStart(rs.getDate("start"));
+   ev.setDuration(rs.getLong("duration"));
+   ev.setName(rs.getString("name"));
+   ev.setDescription(rs.getString("description"));
+   ev.setColorId(rs.getString("color_id"));
+   data.add(ev);
+}
+return data; 
+} catch (SQLException e) {
+log.severe(e.getMessage()+"  "+ e.getClass().toString());
+}
+return null;	// TODO Auto-generated method stub
 }
 }
 

@@ -10,6 +10,7 @@ public class Event {
 	String name;
 	String googleId;
 	String description;
+	String colorId;
 	
 public Event() {
 	start=new Date();
@@ -87,6 +88,15 @@ public void setDescription(String description) {
 	this.description = description;
 }
 
+public String getColorId() {
+	return colorId;
+}
 
+public void setColorId(String colorId) {
+	this.colorId = colorId;
+}
 
+public void setColorId() {
+	// TODO Auto-generated method stub
+}
 }

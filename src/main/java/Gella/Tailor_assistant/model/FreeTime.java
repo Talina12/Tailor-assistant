@@ -19,7 +19,7 @@ public class FreeTime {
  /**
   * the duration of free time
   */
- private double duration;
+ private long duration;
  
  /**
   * creates free time for today according to the schedule 
@@ -63,7 +63,7 @@ public class FreeTime {
 	       else init();
   }
   
-public double getDuration() {
+public long getDuration() {
 		return duration;
 }
 

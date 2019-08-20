@@ -111,16 +111,8 @@ public class MainWindow {
 			}
 		});
 		fon.add(testButton);
-		
-		
-		
-		try {
-			dbHandler = DbHandler.getInstance();
-		} catch (SQLException e) {
-			System.out.println("error dbHandler");
-			e.printStackTrace();
+		dbHandler = DbHandler.getInstance();
 		}
-	}
 
 	public JFrame getFrame() {
 		return frame;

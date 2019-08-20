@@ -44,8 +44,6 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DocumentFilter;
 import javax.swing.text.MaskFormatter;
-import javax.swing.text.DocumentFilter.FilterBypass;
-
 import Gella.Tailor_assistant.controller.*;
 import Gella.Tailor_assistant.model.*;
 import javax.swing.JScrollPane;
@@ -111,21 +109,18 @@ public class NewOrderWindow extends JFrame{
 	private CalendarController calendarController;
 	private Settings settings;
 	private Event[] dates;
+	private GoogleCalendarController googleCalendarController;
 	
 	public NewOrderWindow() {
 		try {
 			dbHandler = DbHandler.getInstance();
+			googleCalendarController=GoogleCalendarController.getInstance();
+			settings=Settings.getInstance();
 		} catch (SQLException e3) {
 			JOptionPane.showMessageDialog(null,e3.getClass().toString()+"unable to connect to database");
 			log.severe("unable to connect to database");
 		}
 		calendarController= CalendarController.getInstance();
-		try {
-			settings=Settings.getInstance();
-		} catch (SQLException e3) {
-			// TODO Auto-generated catch block
-			e3.printStackTrace();
-		}
 		newOrder= new Order();
 		setBounds(30, 50, 901, 640);
 		setTitle("New order");
@@ -163,6 +158,7 @@ public class NewOrderWindow extends JFrame{
 	        }	
 			});
 		firstNameField.addKeyListener(textFieldKeyAdapter);
+		firstNameField.addActionListener(textFieldActionListener);
 		defaultBorder=firstNameField.getBorder(); //save the current frame of elements
 				
 		LastNameLabel = new JLabel("Last name");
@@ -186,6 +182,7 @@ public class NewOrderWindow extends JFrame{
 				}	
 			}	);
 		lastNameField.addKeyListener(textFieldKeyAdapter);
+		lastNameField.addActionListener(textFieldActionListener);
 		cellphoneField = new JTextField();
 		cellphoneField.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		cellphoneField.setBounds(122, 78, 135, 22);
@@ -230,6 +227,7 @@ public class NewOrderWindow extends JFrame{
 				}	
 			}	);
 		cellphoneField.addKeyListener(textFieldKeyAdapter);
+		cellphoneField.addActionListener(textFieldActionListener);
 		
 		homePhoneLabel = new JLabel("Home phone");
 		homePhoneLabel.setFont(new Font("Tahoma", Font.PLAIN, 14));
@@ -285,6 +283,7 @@ public class NewOrderWindow extends JFrame{
 				}	
 			});
 		homePhoneField.addKeyListener(textFieldKeyAdapter);
+		homePhoneField.addActionListener(textFieldActionListener);
 		separator = new JSeparator();
 		separator.setBounds(10, 118, 735, 2);
 		contentPane.add(separator);
@@ -487,15 +486,15 @@ public class NewOrderWindow extends JFrame{
 		fitDateLabel.setBounds(35, 431, 184, 22);
 		contentPane.add(fitDateLabel);
 		
-		fitDayField = new JFormattedTextField(new SimpleDateFormat("dd/MM/yyyy"));
+		fitDayField = new JFormattedTextField(new SimpleDateFormat("dd/MM/yy"));
 		try {
-			MaskFormatter dateMask = new MaskFormatter("##/##/####");
+			MaskFormatter dateMask = new MaskFormatter("##/##/##");
 			dateMask.install(fitDayField);
 		} catch (ParseException e2) {
 			// TODO Auto-generated catch block
 			e2.printStackTrace();
 		}
-		fitDayField.setBounds(228, 431, 86, 22);
+		fitDayField.setBounds(228, 431, 76, 22);
 		fitDayField.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		contentPane.add(fitDayField);
 		fitDayField.setColumns(10);
@@ -516,16 +515,16 @@ public class NewOrderWindow extends JFrame{
 		issueDateLabel.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		issueDateLabel.setBounds(35, 476, 77, 22);
 		contentPane.add(issueDateLabel);
-		issueDateField = new JFormattedTextField(new SimpleDateFormat("dd/MM/yyyy"));
+		issueDateField = new JFormattedTextField(new SimpleDateFormat("dd/MM/yy"));
 			try {
-				MaskFormatter dateMask = new MaskFormatter("##/##/####");
+				MaskFormatter dateMask = new MaskFormatter("##/##/##");
 				dateMask.install(issueDateField);
 			} catch (ParseException e2) {
 				// TODO Auto-generated catch block
 				e2.printStackTrace();
 			}
 		issueDateField.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		issueDateField.setBounds(133, 476, 86, 22);
+		issueDateField.setBounds(133, 476, 76, 22);
 		contentPane.add(issueDateField);
 		issueDateField.setColumns(10);
 		
@@ -543,7 +542,9 @@ public class NewOrderWindow extends JFrame{
 				  }
 			 else {
 				 setOrder(newOrder);
-				 dbHandler.addOrder(newOrder);
+				 int id= dbHandler.addOrder(newOrder);
+				 for (Event ev: dbHandler.getEventsByOrderId(id))
+				   googleCalendarController.addEvent(ev);	 
 				 dispose();
 				 } 
 			}});
@@ -695,43 +696,6 @@ public class NewOrderWindow extends JFrame{
 	    }
 	};
 
-	/**
-     * catches keys pressed up and ,down and enter controls the table of hints and enters the 
-     * selected value to the table
-     */
-	private KeyAdapter tableCellKeyAdapter = new KeyAdapter() {
-	public void keyPressed(KeyEvent e) {
-		int i;
-		if (hintWindow.isVisible()) {
-			hintWindow.setFocusable(false);
-		switch (e.getKeyCode()) {
-		 case (KeyEvent.VK_DOWN):
-		 i=hintWindow.getHintTable().getSelectedRow();
-		 if (i<hintWindow.getHintTable().getRowCount()-1)
-		  {hintWindow.getHintTable().changeSelection(i+1, 0,false, false);
-		   }
-		 else hintWindow.getHintTable().changeSelection(0, 0,false, false);
-		  break;
-		case (KeyEvent.VK_UP):
-		i=hintWindow.getHintTable().getSelectedRow();
-		if (i>0)
-		 hintWindow.getHintTable().changeSelection(i-1, 0,false, false);	
-		else hintWindow.getHintTable().changeSelection(hintWindow.getHintTable().getRowCount()-1, 0,false, false);
-		break;
-		case (KeyEvent.VK_ENTER):
-	     if(hintWindow.getHintTable().getModel() instanceof HintDesTableModel) {
-	    	DescriptionRow d;
-			  d=((HintDesTableModel) hintWindow.getHintTable().getModel()).getDescriptionRow(hintWindow.getHintTable().getSelectedRow());
-			  setDesc(d);
-			  hintWindow.setVisible(false);
-			}
-			  else {log.warning("HintTableModel is not instance of HintDesTableModel");
-			  hintWindow.setVisible(false);}
-		break;
-		}
-		}
-    }
-};
 
 /**
  * enters the value of the selected item in hintWindow into the table

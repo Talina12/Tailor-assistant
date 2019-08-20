@@ -99,7 +99,7 @@ public class GoogleCalendarController {
 	      }
 		  }
 	  
-  public static synchronized GoogleCalendarController getInstance() throws SQLException {
+  public static synchronized GoogleCalendarController getInstance() {
    if (instance == null) instance = new GoogleCalendarController();
    return instance;
   }	  
@@ -130,7 +130,8 @@ public class GoogleCalendarController {
    return result;
  }
 	  
-  public void synchronizeGoogleToLocal() throws IOException {
+  public void synchronizeGoogleToLocal() {
+	try {
 	List<com.google.api.services.calendar.model.Event> googleEvents = client.events().list(workingCalendar.getId()).execute().getItems();
 	if (googleEvents!=null) {
 	 for (com.google.api.services.calendar.model.Event ge:googleEvents) {
@@ -138,31 +139,44 @@ public class GoogleCalendarController {
 	   if (localEvents!=null) {
 		if (localEvents.size()>1) {/*TODO sync error handling*/};
 	    if (localEvents.size()==0) client.events().delete(workingCalendar.getId(),ge.getId()).execute();
-		else {Gella.Tailor_assistant.model.Event ev=localEvents.get(0);
-			  ev.setStart(new Date(ge.getStart().getDateTime().getValue()));
-		      long duration =ge.getEnd().getDateTime().getValue()-ge.getStart().getDateTime().getValue();
-		      ev.setDuration(duration);
-		      ev.setName(ge.getSummary());
-		      ev.setDescription(ge.getDescription());
-		      dbHandler.updateEvent(ev);
+		else dbHandler.updateEvent(setLocalEvent(localEvents.get(0),ge));
 		}
-	   }
-	 }
+	  }
+	}
+	}catch (IOException e){
+		log.severe(e.getMessage()+"  "+e.getClass().toString());
 	}
  }
   
-  public void synchronizeLocalToGoogle() {
+ private Gella.Tailor_assistant.model.Event setLocalEvent
+      (Gella.Tailor_assistant.model.Event locEv,com.google.api.services.calendar.model.Event ge) {
+   //if (locEv==null)log.info("locEv=null");
+   //if (ge==null)log.info("ge=null");
+	// if (ge.getStart()==null) log.info("ge.getStart()=null");
+	 log.info(ge.getSummary());
+   locEv.setStart(new Date(ge.getStart().getDateTime().getValue()));
+   long duration =ge.getEnd().getDateTime().getValue()-ge.getStart().getDateTime().getValue();
+   locEv.setDuration(duration);
+   locEv.setName(ge.getSummary());
+   locEv.setGoogleId(ge.getId());
+   locEv.setDescription(ge.getDescription());
+   return locEv;
+}
+
+public void synchronizeLocalToGoogle() {
 	  ArrayList<Gella.Tailor_assistant.model.Event> localEvents  = dbHandler.getEvents();
 	  for(Gella.Tailor_assistant.model.Event lev:localEvents) {
+		  com.google.api.services.calendar.model.Event ge;  
 		  try {
-			client.events().get(workingCalendar.getId(), lev.getGoogleId()).execute();
-			
-			}
+			ge =client.events().get(workingCalendar.getId(), lev.getGoogleId()).execute();
+			if ((ge.getStart()==null)||ge.getColorId()==null||ge.getEnd()==null||ge.getId()==null) 
+				addEvent(lev);	
+			else dbHandler.updateEvent(setLocalEvent(lev, ge));
+		  }
 		  catch ( GoogleJsonResponseException e) {
 			log.info(e.getMessage()+" "+ e.getClass().toString());
-			lev.setGoogleId(addEvent(lev).getId());
-			dbHandler.updateEvent(lev); 
-		} catch (IOException e) {
+			addEvent(lev);
+   		  } catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -191,19 +205,12 @@ public class GoogleCalendarController {
 	  return null;
   }
   
-  com.google.api.services.calendar.model.Event addEvent(Gella.Tailor_assistant.model.Event ev) {
-	com.google.api.services.calendar.model.Event event = new Event();
-    event.setSummary(ev.getName());
-    event.setDescription(ev.getDescription());
-	Date startDate =ev.getStart();
-	Date endDate = ev.getEnd();
-	DateTime start = new DateTime(startDate, TimeZone.getTimeZone("UTC"));
-	event.setStart(new EventDateTime().setDateTime(start));
-    DateTime end = new DateTime(endDate, TimeZone.getTimeZone("UTC"));
-    event.setEnd(new EventDateTime().setDateTime(end));
-	Event result;
-	 try {
-		  result = client.events().insert(workingCalendar.getId(), event).execute();
+  public com.google.api.services.calendar.model.Event addEvent(Gella.Tailor_assistant.model.Event ev) {
+	com.google.api.services.calendar.model.Event event = setGoogleEvent(new com.google.api.services.calendar.model.Event(), ev);
+    try {
+		 Event  result = client.events().insert(workingCalendar.getId(), event).execute();
+		 ev.setGoogleId(result.getId());
+		 dbHandler.updateEvent(ev);
 		  return result;
 		 } catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -212,7 +219,17 @@ public class GoogleCalendarController {
 	return null;
   }
   
-  public boolean isEquivalent(com.google.api.services.calendar.model.Event gogEv ,Gella.Tailor_assistant.model.Event locEv) {
-	  
+  public com.google.api.services.calendar.model.Event setGoogleEvent
+           (com.google.api.services.calendar.model.Event ge,Gella.Tailor_assistant.model.Event locEv){
+	  Date startDate =locEv.getStart();
+	  DateTime start = new DateTime(startDate, TimeZone.getTimeZone("UTC"));
+	  ge.setStart(new EventDateTime().setDateTime(start));
+	  Date endDate = locEv.getEnd();
+	  DateTime end = new DateTime(endDate, TimeZone.getTimeZone("UTC"));
+	  ge.setEnd(new EventDateTime().setDateTime(end));
+	  ge.setSummary(locEv.getName());
+	  ge.setDescription(locEv.getDescription());
+	  ge.setColorId(locEv.getColorId());
+	  return ge;
   }
 }
