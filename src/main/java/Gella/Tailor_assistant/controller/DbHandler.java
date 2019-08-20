@@ -43,7 +43,6 @@ public class DbHandler {
 	private static String CON_STR ; 
 	private static DbHandler instance = null;
 	private String info;
-	private Settings settings;
 	Logger log;
 	 
 	public static synchronized DbHandler getInstance() throws SQLException {
@@ -61,7 +60,6 @@ public class DbHandler {
     * @throws SQLException
     */
 	private DbHandler() throws SQLException {
-        settings = Settings.getInstance();
         CON_STR=Settings.getCON_STR();
 		// Register the driver
         DriverManager.registerDriver(new JDBC());
@@ -181,14 +179,15 @@ public class DbHandler {
      private void addEvent(Event e) {
     	 try {
  			PreparedStatement statement = this.connection.prepareStatement(
- 			         "INSERT INTO Events(`id_order`,`start`,`duration`,`name`,`id_google`) " +
- 			          "VALUES(?,?,?,?,?)") ;
+ 			         "INSERT INTO Events(`id_order`,`start`,`duration`,`name`,`id_google`, `description`) " +
+ 			          "VALUES(?,?,?,?,?,?)") ;
  			statement.setInt(1, e.getOrderId());
  			java.sql.Date rd = new java.sql.Date(e.getStart().getTime());
  			statement.setDate(2,rd);
  			statement.setDouble(3, e.getDuration());
  			statement.setString(4, e.getName());
  			statement.setString(5, e.getGoogleId());
+ 			statement.setString(6, e.getDescription());
  			statement.execute();
  			 }
              catch (SQLException exep) {
@@ -618,6 +617,7 @@ public void createEventsTable() {
 		     +  "start integer,\n"
              +  "duration integer,\n"
 		     +  "name string , \n"
+		     +  "description string   \n"
              + "FOREIGN KEY (id_order) REFERENCES Orders(id))";
 	try {
 		Statement stmt = connection.createStatement();
@@ -631,7 +631,7 @@ public void createEventsTable() {
 }
 
 public ArrayList<Event> getEventsByGoogleId(String id) {
-	String sql = "SELECT id, id_order, id_google, start, duration, name FROM Events "
+	String sql = "SELECT id, id_order, id_google, start, duration, name, description FROM Events "
 	 		+ " WHERE id_google LIKE ?";
 
 try ( PreparedStatement stat  = this.connection.prepareStatement(sql)){
@@ -646,8 +646,9 @@ while (rs.next()) {
    ev.setOrderId(rs.getInt("id_order"));
    ev.setGoogleId(rs.getString("id_google"));
    ev.setStart(rs.getDate("start"));
-   ev.setDuration(rs.getDouble("duration"));
+   ev.setDuration(rs.getLong("duration"));
    ev.setName(rs.getString("name"));
+   ev.setDescription(rs.getString("description"));
    data.add(ev);
 }
 return data; 
@@ -658,27 +659,47 @@ return null;
 }
 
 ArrayList<Event> getEvents(){
- String sql= "SELECT id, id_order, id_google, start, duration, name FROM Events ORDER BY id";
+ String sql= "SELECT id, id_order, id_google, start, duration, name, description FROM Events ORDER BY id";
  try (Statement statement = this.connection.createStatement()) {
    //  upload to ArrayList orders obtained from the database.
    ArrayList<Event> events = new ArrayList<Event>();
    ResultSet resultSet = statement.executeQuery(sql);
    while (resultSet.next()) {
-   Event ev= new Event();
-   nc[0]=String.valueOf(resultSet.getInt("id"));
-            nc[1]= resultSet.getString("first_name");
-            nc[2]=resultSet.getString("last_name");  
-            nc[3]=resultSet.getString("cellphone");
-            nc[4]=resultSet.getString("home_phone");
-            customers.add(nc);
-            }
-        return customers.toArray(new String[customers.size()][Customer.getTitles().length]);
-
-    } catch (SQLException e) {
+     Event ev= new Event();
+     ev.setId(resultSet.getInt("id"));
+     ev.setOrderId(resultSet.getInt("id_order"));
+     ev.setGoogleId(resultSet.getString("id_google"));  
+     ev.setStart(resultSet.getDate("start"));
+     ev.setDuration(resultSet.getLong("duration"));
+     ev.setName(resultSet.getString("name"));
+     ev.setDescription(resultSet.getString("description"));
+     events.add(ev);
+   }
+   return events;
+ } catch (SQLException e) {
  	   System.out.println("error in selecl all customers function");
         e.printStackTrace();
         return null;
     }	
+}
+
+public void updateEvent(Event lev) {
+	// TODO Auto-generated method stub
+ String sql = "UPDATE events SET id_google = ? ,start = ?, duration=?, name=?, description=? WHERE id = ?";
+ PreparedStatement pstmt;
+try {
+	pstmt = this.connection.prepareStatement(sql);
+	pstmt.setString(1, lev.getGoogleId());
+	java.sql.Date d = new java.sql.Date(lev.getStart().getTime());
+	pstmt.setDate(2, d);
+	pstmt.setLong(3, lev.getDuration());
+	pstmt.setString(4, lev.getName());
+	pstmt.setString(5, lev.getDescription());
+	pstmt.executeUpdate();
+    } catch (SQLException e) {
+	   // TODO Auto-generated catch block
+	  e.printStackTrace();
+}	 
 }
 }
 

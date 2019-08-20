@@ -5,10 +5,11 @@ import java.util.Date;
 public class Event {
 	int id;
 	Date start;
-	double duration; 
+	long duration; 
 	int orderId;
 	String name;
 	String googleId;
+	String description;
 	
 public Event() {
 	start=new Date();
@@ -17,9 +18,10 @@ public Event() {
 	duration=0;
 	orderId=0;
 	googleId=new String();
+	description = new String();
 }
 
-public Event(Date start, double duration) {
+public Event(Date start, long duration) {
 	this();
 	this.start=start;
 	this.duration=duration;
@@ -29,7 +31,7 @@ public void setStart(Date start) {
 	this.start = start;
 }
 
-public void setDuration(double duration) {
+public void setDuration(long duration) {
 	this.duration = duration;
 }
 
@@ -45,7 +47,7 @@ public Date getStart() {
 	return start;
 }
 
-public double getDuration() {
+public long getDuration() {
 	return duration;
 }
 
@@ -71,6 +73,18 @@ public int getId() {
 
 public void setId(int id) {
 	this.id = id;
+}
+
+public Date getEnd() {
+	return (new Date(start.getTime()+duration));
+}
+
+public String getDescription() {
+	return description;
+}
+
+public void setDescription(String description) {
+	this.description = description;
 }
 
 

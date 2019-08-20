@@ -1,9 +1,9 @@
 package Gella.Tailor_assistant.app;
 
-import java.io.IOException;
 import java.sql.SQLException;
 
 import Gella.Tailor_assistant.controller.*;
+import Gella.Tailor_assistant.model.Event;
 
 
 public class Test {
@@ -12,12 +12,14 @@ public class Test {
 		// TODO Auto-generated method stub
 		try {
 			GoogleCalendarController googleCalendarController= GoogleCalendarController.getInstance();
-			googleCalendarController.addCalendarIfNotExist();
-		} catch (SQLException e) {
+			Event ev = new Event();
+			ev.setGoogleId(googleCalendarController.GetTestEvent());
+			googleCalendarController.test(ev);
+			ev.setGoogleId(ev.getGoogleId()+"rt");
+			googleCalendarController.test(ev);
+			} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (IOException i) {
-			i.printStackTrace();
 		}
 		
 	}
