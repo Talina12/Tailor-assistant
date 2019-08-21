@@ -169,7 +169,7 @@ public void synchronizeLocalToGoogle() {
 		  com.google.api.services.calendar.model.Event ge;  
 		  try {
 			ge =client.events().get(workingCalendar.getId(), lev.getGoogleId()).execute();
-			if ((ge.getStart()==null)||ge.getColorId()==null||ge.getEnd()==null||ge.getId()==null) 
+			if (ge.getStart()==null)//||ge.getColorId()==null||ge.getEnd()==null||ge.getId()==null) 
 				addEvent(lev);	
 			else dbHandler.updateEvent(setLocalEvent(lev, ge));
 		  }
