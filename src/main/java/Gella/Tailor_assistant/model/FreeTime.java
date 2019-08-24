@@ -74,17 +74,51 @@ protected void init() {
 	start= new Date();
     GregorianCalendar calendar = new GregorianCalendar();
     calendar.setTime(start);
+    //get the day of the week
     int dayOfWeek= calendar.get(Calendar.DAY_OF_WEEK);
+    //check if there are working hours for this day
     if (settings.getSheduleEnd(dayOfWeek).after(settings.getSheduleStart(dayOfWeek))) {
+     //if now we are in the middle of working hours	
     if (start.after(settings.getSheduleStart(dayOfWeek))&& start.before(settings.getSheduleEnd(dayOfWeek))) 
-	 duration= settings.getSheduleEnd(dayOfWeek).getTime()-start.getTime();
-    else if (start.before(settings.getSheduleStart(dayOfWeek))) 
+	 //that free time from now until the end of business hours
+    	duration= settings.getSheduleEnd(dayOfWeek).getTime()-start.getTime();
+    //otherwise if now we are before working hours
+    else if (start.before(settings.getSheduleStart(dayOfWeek))) {
 	      duration= settings.getSheduleEnd(dayOfWeek).getTime()-settings.getSheduleStart(dayOfWeek).getTime();
+	      start=settings.getSheduleStart(dayOfWeek);
+         }
          else duration = 0;
       }
   }
 public Date getStart() {
 	return start;
 }
+
+public Date getEnd() {
+	return new Date(start.getTime()+duration);
+}
+
+/**
+ * sets the beginning of free time and recounts the duration. 
+ * If the start after the end of free time, the duration is set to 0 or negative 
+ * Caution! compliance with the work schedule is not checked
+ * @param start new beginning of free time
+ */
+public void setStart(Date start){
+	Date end= new Date(this.start.getTime()+duration);
+	this.start=start;
+	duration=end.getTime()-this.start.getTime();
+	this.start=start;
+}
+
+/**
+ * sets the end of free time and recounts the duration. 
+ * If the start after the end of free time, the duration is set to 0 or negative 
+ * Caution! compliance with the work schedule is not checked
+ * @param end new beginning of free time
+ */
+public void setEnd(Date end) {
+ duration= end.getTime()-this.start.getTime();	
+ }
  }
 

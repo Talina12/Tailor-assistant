@@ -4,12 +4,18 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
 import java.util.TimeZone;
 import java.util.logging.Logger;
+
+import javax.swing.JOptionPane;
+
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
@@ -23,12 +29,18 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.DateTime;
 import com.google.api.client.util.store.DataStoreFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
+import com.google.api.services.calendar.Calendar.Freebusy;
 import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.Calendar;
 import com.google.api.services.calendar.model.CalendarList;
 import com.google.api.services.calendar.model.CalendarListEntry;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
+import com.google.api.services.calendar.model.FreeBusyCalendar;
+import com.google.api.services.calendar.model.FreeBusyRequest;
+import com.google.api.services.calendar.model.FreeBusyRequestItem;
+import com.google.api.services.calendar.model.FreeBusyResponse;
+import com.google.api.services.calendar.model.TimePeriod;
 
 import Gella.Tailor_assistant.model.Settings;
 
@@ -231,5 +243,57 @@ public void synchronizeLocalToGoogle() {
 	  ge.setDescription(locEv.getDescription());
 	  ge.setColorId(locEv.getColorId());
 	  return ge;
+  }
+  
+  /**
+   * returns the beginning and end of busy periods in all calendars. 
+   * result sorted
+   * @param start start of checking period
+   * @param end end of checking period
+   * @return ArrayList of Date[2] in which Date[0] is a start of busy period 
+   * and Date[1] is an end of busy period
+   */
+  public ArrayList<Date[]> getBusy(Date start, Date end) {
+	  FreeBusyRequest req = new FreeBusyRequest();
+	  DateTime startTime = new DateTime(start, TimeZone.getDefault());
+	  DateTime endTime = new DateTime(end, TimeZone.getDefault());
+	  req.setTimeMin(startTime);
+	  req.setTimeMax(endTime);
+	  CalendarList list;
+	try {
+		list = client.calendarList().list().execute();
+	    ArrayList<Date[]> result = new  ArrayList<Date[]>();
+		List<CalendarListEntry> calendarList = list.getItems();
+	    List<FreeBusyRequestItem> items = new ArrayList<FreeBusyRequestItem>();
+	    for (CalendarListEntry c:calendarList) 
+	      items.add(new FreeBusyRequestItem().setId(c.getId()));
+	    req.setItems(items);
+	    //execute the request
+	    FreeBusyResponse fbq = client.freebusy().query(req).execute();
+	    Map<java.lang.String,FreeBusyCalendar> map =fbq.getCalendars();
+	    for (CalendarListEntry c:calendarList) {
+	    	List<TimePeriod> timePeriods= map.get(c.getId()).getBusy();
+	    	for (TimePeriod tp:timePeriods) {
+	    	 Date[] period = new Date[2];
+	    	 period[0]=new Date(tp.getStart().getValue());
+	    	 period[1]= new Date(tp.getEnd().getValue());
+	    	 result.add(period);
+	    	}
+	     }
+	    //sort the result
+	    Collections.sort(result, new Comparator<Date[]>() {
+            @Override
+			public int compare(Date[] o1, Date[] o2) {
+				return o1[0].compareTo(o2[0]);
+			}
+		});
+	 /*   for(Date[] d:result) 
+	    	System.out.println(d[0].toString()+"   "+d[1].toString()); */
+	    return result;
+	    } catch (IOException e) {
+		JOptionPane.showMessageDialog(null,e.getClass().toString()+"   unable to request freeBusy");
+		log.severe(e.getMessage() +"  "+e.getClass().toString());
+	}
+	return null;
   }
 }
