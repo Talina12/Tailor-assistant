@@ -121,6 +121,7 @@ public class NewOrderWindow extends JFrame{
 			log.severe("unable to connect to database");
 		}
 		calendarController= CalendarController.getInstance();
+		googleCalendarController.synchronizeGoogleToLocal();
 		newOrder= new Order();
 		setBounds(30, 50, 901, 640);
 		setTitle("New order");
