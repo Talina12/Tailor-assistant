@@ -5,6 +5,7 @@ import java.util.Date;
 
 import Gella.Tailor_assistant.model.Event;
 import Gella.Tailor_assistant.model.FreeTime;
+import Gella.Tailor_assistant.model.Settings;
 
 /**
  * class for managing time, events  and scheduling
@@ -31,18 +32,6 @@ public class CalendarController {
 	}
  
 
- /**
-  * creates an object and fills  a free time sheet for 10 days in advance
-  */
- public CalendarController(){
-	offset=10;
-	freeTimes = new ArrayList <FreeTime>();
-	for (int i=0;i<offset;i++) {
-		FreeTime t = new FreeTime(i);
-	    if (t.getDuration()>0)  //do not add objects with zero duration
-	    	freeTimes.add(t);
-}
-}
 
 /**
  * goes through the list of free times from the beginning and returns the date
@@ -87,7 +76,7 @@ public class CalendarController {
 		 f.setStart(freeTime.getStart());
 		 f.setEnd(event[0]);
 		 freeTime.setStart(event[1]);
-		 if (f.getDuration()>0) 
+		 if (f.getDuration()>Settings.getMinEvent()) 
 			 result.add(f);
 		 if (freeTime.getDuration()<=0) break;
 	 }
@@ -95,7 +84,7 @@ public class CalendarController {
 	       if (freeTime.getDuration()<=0) break;
 	 }
 	}
-	if (freeTime.getDuration()>0) 
+	if (freeTime.getDuration()>Settings.getMinEvent()) 
 		result.add(freeTime);
    freeTimes = result;
    offset =0;
@@ -125,7 +114,7 @@ public class CalendarController {
 				 f.setStart(freeTime.getStart());
 				 f.setEnd(event[0]);
 				 freeTime.setStart(event[1]);
-				 if (f.getDuration()>0) {
+				 if (f.getDuration()>Settings.getMinEvent()) {
 					 freeTimes.add(f);
 					 notAdded=false;
 				 }

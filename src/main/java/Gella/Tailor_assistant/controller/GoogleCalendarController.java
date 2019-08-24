@@ -165,7 +165,8 @@ public class GoogleCalendarController {
    //if (locEv==null)log.info("locEv=null");
    //if (ge==null)log.info("ge=null");
 	// if (ge.getStart()==null) log.info("ge.getStart()=null");
-	 log.info(ge.getSummary());
+	 //log.info(ge.getSummary());
+	 log.info("setLocalEvent");
    locEv.setStart(new Date(ge.getStart().getDateTime().getValue()));
    long duration =ge.getEnd().getDateTime().getValue()-ge.getStart().getDateTime().getValue();
    locEv.setDuration(duration);
@@ -181,9 +182,10 @@ public void synchronizeLocalToGoogle() {
 		  com.google.api.services.calendar.model.Event ge;  
 		  try {
 			ge =client.events().get(workingCalendar.getId(), lev.getGoogleId()).execute();
-			if (ge.getStart()==null)//||ge.getColorId()==null||ge.getEnd()==null||ge.getId()==null) 
+			if ((ge.getStart()==null)||(ge.getStatus().compareTo("cancelled")==0))//==null||ge.getEnd()==null||ge.getId()==null) 
 				addEvent(lev);	
-			else dbHandler.updateEvent(setLocalEvent(lev, ge));
+			else  dbHandler.updateEvent(setLocalEvent(lev, ge));
+			
 		  }
 		  catch ( GoogleJsonResponseException e) {
 			log.info(e.getMessage()+" "+ e.getClass().toString());
@@ -218,9 +220,11 @@ public void synchronizeLocalToGoogle() {
   }
   
   public com.google.api.services.calendar.model.Event addEvent(Gella.Tailor_assistant.model.Event ev) {
-	com.google.api.services.calendar.model.Event event = setGoogleEvent(new com.google.api.services.calendar.model.Event(), ev);
+	log.info("add event");
+	  com.google.api.services.calendar.model.Event event = setGoogleEvent(new com.google.api.services.calendar.model.Event(), ev);
     try {
 		 Event  result = client.events().insert(workingCalendar.getId(), event).execute();
+		 log.info("added  "+result.getSummary());
 		 ev.setGoogleId(result.getId());
 		 dbHandler.updateEvent(ev);
 		  return result;

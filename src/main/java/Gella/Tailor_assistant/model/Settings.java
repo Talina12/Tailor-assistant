@@ -22,6 +22,7 @@ import java.util.GregorianCalendar;
  private static final String CALENDAR_NAME = "Tailor calendar";
  private static final java.io.File DATA_STORE_DIR =
 	      new java.io.File(System.getProperty("user.dir"), ".store/"+APPLICATION_NAME);
+ private static final long minEvent=900000;
  
  public static synchronized Settings getInstance() throws SQLException {
      if (instance == null)
@@ -131,6 +132,10 @@ public static String getCalendarName() {
 
 public static java.io.File getDataStoreDir() {
 	return DATA_STORE_DIR;
+}
+
+public static long getMinEvent() {
+	return minEvent;
 }
 
 
