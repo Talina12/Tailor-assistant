@@ -61,6 +61,7 @@ public class MainWindow2 {
 		buttons = new Box(BoxLayout.X_AXIS);
 		buttons.setMinimumSize(new Dimension((int) (screenSize.width/1.5),screenSize.height/10 ));
 		buttons.setMaximumSize(new Dimension((int) (screenSize.width/1.5),screenSize.height/10 ));
+		buttons.setPreferredSize(new Dimension((int) (screenSize.width/1.5),screenSize.height/10 ));
 		//buttons.setBorder(border);
 		//buttons.setBackground(new Color(0,0,0,0));
 		newOrderButton = new JButton("New order");
