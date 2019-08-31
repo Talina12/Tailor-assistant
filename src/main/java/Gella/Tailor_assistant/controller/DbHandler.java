@@ -743,5 +743,41 @@ log.severe(e.getMessage()+"  "+ e.getClass().toString());
 }
 return null;	// TODO Auto-generated method stub
 }
+
+public ArrayList<Order> getOrdersById(String orderId) {
+	String sql = "SELECT id, id_customer, rec_date, description, total_price,estimated_comp_day, try_on,"
+			+ "paid, exec_time, status,fit_day, issue_date, first_name, last_name, cellphone,"
+			+ "home_phone  FROM Orders INNER JOIN Customers on Customers.id=Order.id_customer"
+	 		+ " WHERE id LIKE ?";
+
+try ( PreparedStatement stat  = this.connection.prepareStatement(sql)){
+// set the value
+stat.setInt(1,Integer.parseInt(orderId+"%"));
+ResultSet rs  = stat.executeQuery();
+// loop through the result set
+ArrayList<Order> data= new ArrayList<Order>();
+while (rs.next()) {
+   Order order = new Order();
+   order.setOrderNumber(rs.getInt("id"));
+   order.setCustomer(customer);
+   cust.setFirstName(rs.getString("first_name"));
+   cust.setLastName(rs.getString("last_name"));
+   cust.setHomePhone(rs.getString("home_phone"));
+   cust.setCellphone(rs.getString("cellphone"));
+   data.add(cust);
 }
+Collections.sort(data,Customer.cellphoneComparator);
+return data; 
+} catch (SQLException e) {
+System.out.println(e.getMessage());
+e.printStackTrace();
+}
+return null;
+}
+}
++ "	id integer PRIMARY KEY,\n"
++ "    first_name text ,\n"
++ "    last_name text ,\n"
++ "    cellphone text,\n"
++ "    home_phone text \n);";
 

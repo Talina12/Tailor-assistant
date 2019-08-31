@@ -191,7 +191,7 @@ public class NewOrderWindow extends JFrame{
 			@Override
 			public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr)throws BadLocationException
 			{
-			  if (Character.isLetter(string.charAt(0)))
+			  if (!Character.isDigit(string.charAt(0)))
 					Toolkit.getDefaultToolkit().beep();
 			  else
 			     if (offset==3||offset==7||offset==10)
@@ -205,7 +205,7 @@ public class NewOrderWindow extends JFrame{
 			@Override
 			public void replace(FilterBypass fb, int offset, int length, String string,AttributeSet attr) throws BadLocationException
 			{
-			  if (Character.isLetter(string.charAt(0)))
+			  if (!Character.isDigit(string.charAt(0)))
 					Toolkit.getDefaultToolkit().beep();
 			  else
 				if (offset==3||offset==7||offset==10)
