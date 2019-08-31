@@ -3,6 +3,7 @@ package Gella.Tailor_assistant.View;
 import java.awt.Toolkit;
 
 import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -15,6 +16,7 @@ import javax.swing.border.Border;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -31,7 +33,7 @@ import java.awt.FlowLayout;
 public class MainWindow2 {
 
 	private JFrame frame;
-	private JPanel buttons ;
+	private Box buttons ;
 	private JPanel fields;
 	private JPanel info;
 	private JButton newOrderButton;
@@ -56,11 +58,10 @@ public class MainWindow2 {
 		
 		border = BorderFactory.createEtchedBorder();
 		
-		buttons = new JPanel();
-		buttons.setLayout(new BoxLayout(buttons,BoxLayout.X_AXIS));
-		buttons.setMinimumSize(new Dimension(screenSize.width-100,screenSize.height/9 ));
-		buttons.setMaximumSize(new Dimension(screenSize.width-100,screenSize.height/9 ));
-		buttons.setBorder(border);
+		buttons = new Box(BoxLayout.X_AXIS);
+		buttons.setMinimumSize(new Dimension((int) (screenSize.width/1.5),screenSize.height/10 ));
+		buttons.setMaximumSize(new Dimension((int) (screenSize.width/1.5),screenSize.height/10 ));
+		//buttons.setBorder(border);
 		//buttons.setBackground(new Color(0,0,0,0));
 		newOrderButton = new JButton("New order");
 		updateOrderButton = new JButton("Update order");
@@ -82,10 +83,15 @@ public class MainWindow2 {
 		return frame;
 	}
 
-	private void setButton(JButton b,JPanel panel) {
+	private void setButton(JButton b,Box panel) {
 		b.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		b.setPreferredSize(new Dimension(screenSize.width/10,screenSize.height/9 ));
+		//b.setPreferredSize(new Dimension(screenSize.width/10,screenSize.height/9 ));
+	    panel.add(Box.createHorizontalGlue());
+		b.setMinimumSize(new Dimension(screenSize.width/9,screenSize.height/9 ));
+		b.setMaximumSize(new Dimension(screenSize.width/9,screenSize.height/9 ));
+		b.setPreferredSize(new Dimension(screenSize.width/9,screenSize.height/9 ));
 		panel.add(b);
+		panel.add(Box.createHorizontalGlue());
 		
 	}
 }
