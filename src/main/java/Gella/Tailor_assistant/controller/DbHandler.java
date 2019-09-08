@@ -745,11 +745,12 @@ return null;	// TODO Auto-generated method stub
 }
 
 public ArrayList<Order> getOrdersById(String orderId) {
-	String sql = "SELECT id, id_customer, rec_date, description, total_price,estimated_comp_day, try_on,"
-			+ "paid, exec_time, status,fit_day, issue_date, first_name, last_name, cellphone,"
-			+ "home_phone  FROM Orders INNER JOIN Customers on Customers.id=Order.id_customer"
+	String sql = "SELECT Orders.id , id_customer, rec_date, description, total_price,estimated_comp_day, "
+			+ "try_on, paid, exec_time, status,fit_day, issue_date, first_name, last_name, "
+			+ "cellphone,home_phone  "
+			+ "FROM Orders INNER JOIN Customers on Customers.id=Orders.id_customer"
 	 		+ " WHERE id LIKE ?";
-
+	
 try ( PreparedStatement stat  = this.connection.prepareStatement(sql)){
 // set the value
 stat.setInt(1,Integer.parseInt(orderId+"%"));
@@ -758,12 +759,27 @@ ResultSet rs  = stat.executeQuery();
 ArrayList<Order> data= new ArrayList<Order>();
 while (rs.next()) {
    Order order = new Order();
-   order.setOrderNumber(rs.getInt("id"));
+   Customer customer = new Customer();
+   customer.setCellphone((rs.getString("cellphone")));
+   customer.setFirstName(rs.getString("first_name"));
+   customer.setHomePhone(rs.getString("home_phone"));
+   customer.setId(rs.getInt("id_customer"));
+   customer.setLastName(rs.getString("last_name"));
    order.setCustomer(customer);
-   cust.setFirstName(rs.getString("first_name"));
-   cust.setLastName(rs.getString("last_name"));
-   cust.setHomePhone(rs.getString("home_phone"));
-   cust.setCellphone(rs.getString("cellphone"));
+   order.setDescription(rs.getString("description"));
+   order.setEstimatedCompTime(rs.getDate("estimated_comp_day"));
+   // TODO order.setEvents(event);
+   order.setExecTime(rs.getFloat("exec_time"));
+   order.setFitDay(rs.getDate("fit_day"));
+   order.setIssueDate(rs.getDate("issue_date"));
+   order.setOrderNumber(rs.getInt("Orders.id"));
+   order.setPaid(rs.getInt("paid"));
+   order.setRecDate(rs.getDate("rec_date"));
+   order.setStatus(OrderStatus.valueOf(rs.getString("status"));
+   order.setTotalPrice(rs.getInt("total_price"));
+   order.setTryOn(rs.getInt("try_on"));
+   
+   
    data.add(cust);
 }
 Collections.sort(data,Customer.cellphoneComparator);

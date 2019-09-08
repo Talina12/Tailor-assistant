@@ -181,4 +181,9 @@ public class Order {
 	 return str;
  }
 
+public void setDescription(String string) {
+	// TODO Auto-generated method stub
+	
+}
+
 }
