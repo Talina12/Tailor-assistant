@@ -90,7 +90,7 @@ import java.util.GregorianCalendar;
 	 calendar.set(Calendar.MINUTE, 0);
 	 calendar.set(Calendar.SECOND, 0);
 	 weekShedule[5][0]=calendar.getTime();
-	 calendar.set(Calendar.HOUR_OF_DAY, 16);
+	 calendar.set(Calendar.HOUR_OF_DAY, 11);
 	 calendar.set(Calendar.MINUTE, 0);
 	 calendar.set(Calendar.SECOND, 0);
 	 weekShedule[5][1]=calendar.getTime();

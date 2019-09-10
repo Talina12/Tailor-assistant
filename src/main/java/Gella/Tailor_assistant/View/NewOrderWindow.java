@@ -466,7 +466,7 @@ public class NewOrderWindow extends JFrame{
 			@Override
 			public void actionPerformed(ActionEvent e) {
 			try {	
-			long duration=Long.parseLong(execTimeField.getText())*3600000;
+			long duration=Math.round(Float.parseFloat(execTimeField.getText())*3600000); 
 			dates= calendarController.getFreeDates(duration);
 		//	for(Event d:dates) System.out.println(d.getStart().toString()+"  " + new Date (d.getStart().getTime()+d.getDuration()).toString());
 			if (dates.length>0) {estimatedCompDateField.setValue(dates[dates.length-1].getStart());
