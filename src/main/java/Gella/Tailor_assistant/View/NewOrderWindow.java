@@ -20,8 +20,6 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
 import java.util.logging.Logger;
 import java.util.*;
 import javax.swing.BorderFactory;
@@ -108,7 +106,7 @@ public class NewOrderWindow extends JFrame{
 	public static Logger log = Logger.getLogger("View.NewOrderWindow");
 	private CalendarController calendarController;
 	private Settings settings;
-	private Event[] dates;
+	private ArrayList<Event> dates;
 	private GoogleCalendarController googleCalendarController;
 	
 	public NewOrderWindow() {
@@ -469,8 +467,8 @@ public class NewOrderWindow extends JFrame{
 			long duration=Long.parseLong(execTimeField.getText())*3600000;
 			dates= calendarController.getFreeDates(duration);
 		//	for(Event d:dates) System.out.println(d.getStart().toString()+"  " + new Date (d.getStart().getTime()+d.getDuration()).toString());
-			if (dates.length>0) {estimatedCompDateField.setValue(dates[dates.length-1].getStart());
-			                     estimatedCompTimeField.setValue(dates[dates.length-1].getStart());}
+			if (dates.size()>0) {estimatedCompDateField.setValue(dates.get(dates.size()-1).getStart());
+			                     estimatedCompTimeField.setValue(dates.get(dates.size()-1).getStart());}
 			else JOptionPane.showMessageDialog(null,"could not find a suitable date");
 			}
 			catch(RuntimeException r) {JOptionPane.showMessageDialog(null,"not valid value in Execution time");

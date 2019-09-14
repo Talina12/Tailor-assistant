@@ -43,7 +43,7 @@ public class CalendarController {
  * @param duration
  * @return Date[]
  */
- public Event[] getFreeDates(long duration) {
+ public ArrayList<Event> getFreeDates(long duration) {
 	ArrayList<Event> dates = new ArrayList<Event>();
 	long sum =duration; 
 	int i=0;
@@ -55,7 +55,7 @@ public class CalendarController {
 	 else dates.add(new Event(freeTimes.get(i).getStart(),freeTimes.get(i).getDuration()));
 	 i++;
 	}
-	return  dates.toArray(new Event[dates.size()]);
+	return  dates;
 	}
 
 /**

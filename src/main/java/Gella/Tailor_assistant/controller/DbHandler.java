@@ -749,7 +749,7 @@ public ArrayList<Order> getOrdersById(String orderId) {
 			+ "try_on, paid, exec_time, status,fit_day, issue_date, first_name, last_name, "
 			+ "cellphone,home_phone  "
 			+ "FROM Orders INNER JOIN Customers on Customers.id=Orders.id_customer"
-	 		+ " WHERE id LIKE ?";
+	 		+ " WHERE Orders.id LIKE ?";
 	
 try ( PreparedStatement stat  = this.connection.prepareStatement(sql)){
 // set the value

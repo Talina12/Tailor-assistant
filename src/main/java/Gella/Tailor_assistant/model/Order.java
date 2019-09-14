@@ -1,6 +1,7 @@
 package Gella.Tailor_assistant.model;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
 
@@ -193,4 +194,6 @@ public static Comparator<Order> idComparator = new Comparator<Order>() {
     	return o1.getOrderNumber()-o2.getOrderNumber();
 	}
 };
+
+
 }

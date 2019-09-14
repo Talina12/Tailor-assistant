@@ -27,6 +27,8 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.DocumentFilter;
 import javax.swing.text.DocumentFilter.FilterBypass;
 
+import org.mortbay.log.Log;
+
 import Gella.Tailor_assistant.controller.DbHandler;
 import Gella.Tailor_assistant.model.Customer;
 import Gella.Tailor_assistant.model.Order;
@@ -66,6 +68,7 @@ public class MainWindow2 {
 		fontSize=screenSize.width/95;
 		border = BorderFactory.createEtchedBorder();
 		dbHandler=DbHandler.getInstance();
+		hintWindow = new HintWindow();
 		
 		buttonsContainer = new Box(BoxLayout.X_AXIS);
 		buttonsContainer.setMinimumSize(new Dimension((int) (screenSize.width/4),screenSize.height/17 ));
@@ -174,6 +177,7 @@ public class MainWindow2 {
 				int y = Math.toIntExact(Math.round(point.getY()));
 				hintWindow.setBounds(x,y+25,300,d.size()*18+20);
 				hintWindow.setVisible(true); 
+				Log.info("setHintWindow");
 				}
 				else hintWindow.setVisible(false);	
 	    }
@@ -197,13 +201,13 @@ public class MainWindow2 {
 			break;
 			case (KeyEvent.VK_ENTER):
 		     if(hintWindow.getHintTable().getModel() instanceof HintCustTableModel) {
-		    	 recDayField.requestFocus(); 
+		    	 /*recDayField.requestFocus(); 
 		    	 Customer c;
 				  c=((HintCustTableModel) hintWindow.getHintTable().getModel()).getCustomer(hintWindow.getHintTable().getSelectedRow());
 				  setCustomer(c);
-				}
-				  else {log.warning("HintTableModel is not instance of HintCustTableModel");
-				  hintWindow.setVisible(false);}
+			*/	}
+				  else {
+					  hintWindow.setVisible(false);}
 			break;
 			}
 			}
