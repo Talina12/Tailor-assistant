@@ -1,6 +1,7 @@
 package Gella.Tailor_assistant.model;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 
 
@@ -32,7 +33,7 @@ public class Order {
 	 */
 	private Date fitDay;
 	private Date issueDate;
-	private Event[] events;
+	private ArrayList<Event> events;
 	private static final int tryOnMax=4;
 	
 	/**
@@ -51,7 +52,7 @@ public class Order {
 		execTime=0;
 		fitDay= null;
 		issueDate=null;
-		events =new Event[0];
+		events =new ArrayList<Event>();
 		customer = new Customer();
 		}
 	
@@ -123,10 +124,10 @@ public class Order {
 	public void setIssueDate(Date issueDate) {
 		this.issueDate = issueDate;
 	}
-	public Event[] getEvents() {
+	public ArrayList<Event> getEvents() {
 		return events;
 	}
-	public void setEvents(Event[] event) {
+	public void setEvents(ArrayList<Event> event) {
 		this.events = event;
 	}
 	
@@ -186,4 +187,10 @@ public void setDescription(String string) {
 	
 }
 
+public static Comparator<Order> idComparator = new Comparator<Order>() {
+	@Override
+	public int compare(Order o1, Order o2) {
+    	return o1.getOrderNumber()-o2.getOrderNumber();
+	}
+};
 }

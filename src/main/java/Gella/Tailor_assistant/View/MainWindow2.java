@@ -122,7 +122,7 @@ public class MainWindow2 {
 			public void caretUpdate(CaretEvent e) {
 				if (orderNumField.isFocusOwner()) {
 				String str = orderNumField.getText();
-				setHintWindow(dbHandler.getOrdersById(Integer.parseInt(str)),orderNumField);
+				setHintWindow(dbHandler.getOrdersById(str),orderNumField);
 				}
 				}	
 			}	);

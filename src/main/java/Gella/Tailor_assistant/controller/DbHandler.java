@@ -775,14 +775,31 @@ while (rs.next()) {
    order.setOrderNumber(rs.getInt("Orders.id"));
    order.setPaid(rs.getInt("paid"));
    order.setRecDate(rs.getDate("rec_date"));
-   order.setStatus(OrderStatus.valueOf(rs.getString("status"));
+   order.setStatus(OrderStatus.valueOf(rs.getString("status")));
    order.setTotalPrice(rs.getInt("total_price"));
    order.setTryOn(rs.getInt("try_on"));
-   
-   
-   data.add(cust);
-}
-Collections.sort(data,Customer.cellphoneComparator);
+   sql= "SELECT id, id_order,id_google,start,duration,name,description,color_id "
+   		+ "FROM Events WHERE id_order=?";
+   PreparedStatement eventStat = this.connection.prepareStatement(sql);
+   eventStat.setInt(1,order.getOrderNumber());
+   ResultSet evrs  = stat.executeQuery();
+   ArrayList<Event> events = new ArrayList<Event>();
+   while(evrs.next()) {
+	Event ev = new Event();
+	ev.setColorId(evrs.getString("color_id"));
+	ev.setDescription(evrs.getString("description"));
+	ev.setDuration(evrs.getLong("duration"));
+	ev.setGoogleId(evrs.getString("id_google"));
+	ev.setId(evrs.getInt("id"));
+	ev.setName(evrs.getString("name"));
+	ev.setOrderId(evrs.getInt("id_order"));
+	ev.setStart(evrs.getDate("start"));
+	events.add(ev);
+   }
+   order.setEvents(events);
+   data.add(order);
+   }
+Collections.sort(data,Order.idComparator);
 return data; 
 } catch (SQLException e) {
 System.out.println(e.getMessage());
@@ -791,9 +808,4 @@ e.printStackTrace();
 return null;
 }
 }
-+ "	id integer PRIMARY KEY,\n"
-+ "    first_name text ,\n"
-+ "    last_name text ,\n"
-+ "    cellphone text,\n"
-+ "    home_phone text \n);";
 
