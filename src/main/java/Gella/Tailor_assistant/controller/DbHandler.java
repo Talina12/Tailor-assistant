@@ -626,7 +626,7 @@ public void createEventsTable() {
              +  "duration integer,\n"
 		     +  "name string , \n"
 		     +  "description string, \n"
-		     +  "color_id,  \n"
+		     +  "color_id, string,  \n"
              + "FOREIGN KEY (id_order) REFERENCES Orders(id))";
 	try {
 		Statement stmt = connection.createStatement();
@@ -744,21 +744,26 @@ log.severe(e.getMessage()+"  "+ e.getClass().toString());
 return null;	// TODO Auto-generated method stub
 }
 
-public ArrayList<Order> getOrdersById(String orderId) {
-	String sql = "SELECT Orders.id , id_customer, rec_date, description, total_price,estimated_comp_day, "
+/**
+ * 
+ * @param orderId
+ * @return null if there is no order with such id
+ */
+public Order getOrderById(int orderId) {
+	String sql = "SELECT Orders.id orders_id, id_customer, rec_date, description, total_price,estimated_comp_day, "
 			+ "try_on, paid, exec_time, status,fit_day, issue_date, first_name, last_name, "
 			+ "cellphone,home_phone  "
 			+ "FROM Orders INNER JOIN Customers on Customers.id=Orders.id_customer"
-	 		+ " WHERE Orders.id LIKE ?";
+	 		+ " WHERE Orders.id = ?";
 	
 try ( PreparedStatement stat  = this.connection.prepareStatement(sql)){
 // set the value
-stat.setInt(1,Integer.parseInt(orderId+"%"));
+stat.setInt(1,orderId);
 ResultSet rs  = stat.executeQuery();
+Order order=null;
 // loop through the result set
-ArrayList<Order> data= new ArrayList<Order>();
-while (rs.next()) {
-   Order order = new Order();
+if (rs.next()) {
+   order = new Order();
    Customer customer = new Customer();
    customer.setCellphone((rs.getString("cellphone")));
    customer.setFirstName(rs.getString("first_name"));
@@ -768,41 +773,20 @@ while (rs.next()) {
    order.setCustomer(customer);
    order.setDescription(rs.getString("description"));
    order.setEstimatedCompTime(rs.getDate("estimated_comp_day"));
-   // TODO order.setEvents(event);
    order.setExecTime(rs.getFloat("exec_time"));
    order.setFitDay(rs.getDate("fit_day"));
    order.setIssueDate(rs.getDate("issue_date"));
-   order.setOrderNumber(rs.getInt("Orders.id"));
+   order.setOrderNumber(rs.getInt("orders_id"));
    order.setPaid(rs.getInt("paid"));
    order.setRecDate(rs.getDate("rec_date"));
    order.setStatus(OrderStatus.valueOf(rs.getString("status")));
    order.setTotalPrice(rs.getInt("total_price"));
    order.setTryOn(rs.getInt("try_on"));
-   sql= "SELECT id, id_order,id_google,start,duration,name,description,color_id "
-   		+ "FROM Events WHERE id_order=?";
-   PreparedStatement eventStat = this.connection.prepareStatement(sql);
-   eventStat.setInt(1,order.getOrderNumber());
-   ResultSet evrs  = stat.executeQuery();
-   ArrayList<Event> events = new ArrayList<Event>();
-   while(evrs.next()) {
-	Event ev = new Event();
-	ev.setColorId(evrs.getString("color_id"));
-	ev.setDescription(evrs.getString("description"));
-	ev.setDuration(evrs.getLong("duration"));
-	ev.setGoogleId(evrs.getString("id_google"));
-	ev.setId(evrs.getInt("id"));
-	ev.setName(evrs.getString("name"));
-	ev.setOrderId(evrs.getInt("id_order"));
-	ev.setStart(evrs.getDate("start"));
-	events.add(ev);
+   order.setEvents(getEventsByOrderId(order.getOrderNumber()));
    }
-   order.setEvents(events);
-   data.add(order);
-   }
-Collections.sort(data,Order.idComparator);
-return data; 
+return order; 
 } catch (SQLException e) {
-System.out.println(e.getMessage());
+log.severe(e.getMessage());
 e.printStackTrace();
 }
 return null;

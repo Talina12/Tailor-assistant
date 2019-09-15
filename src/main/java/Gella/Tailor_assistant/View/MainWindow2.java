@@ -40,8 +40,8 @@ public class MainWindow2 {
 	private JFrame frame;
 	private Box buttonsContainer ;
 	private JPanel fieldsContainer;
-	private JPanel info;
-	private JButton newOrderButton;
+	private Box resultsContainer;
+    private JButton newOrderButton;
 	private JButton updateOrderButton;
 	private JLabel orderNumLabel;
 	private JTextField orderNumField;
@@ -120,27 +120,26 @@ public class MainWindow2 {
 				fb.insertString( offset, string, attr );
 					}
 					} );
-		orderNumField.addCaretListener(new CaretListener () {
+		orderNumField.addActionListener(new ActionListener() {
 			@Override
-			public void caretUpdate(CaretEvent e) {
-				if (orderNumField.isFocusOwner()) {
-				String str = orderNumField.getText();
-				setHintWindow(dbHandler.getOrdersById(str),orderNumField);
-				}
-				}	
-			}	);
-		orderNumField.addKeyListener(textFieldKeyAdapter);
+			public void actionPerformed(ActionEvent e) {
+				setResultContainer(dbHandler.getOrderById(Integer.parseInt(orderNumField.getText())));	}
+
+			
+		});
 		setField(orderNumLabel,fieldsContainer);
 		setField(orderNumField, fieldsContainer);
 		fieldsContainer.setVisible(false);
 		frame.getContentPane().add(fieldsContainer);
 		
-		
-		info = new JPanel();
-		info.setPreferredSize(new Dimension(500,30 ));
-		info.setMaximumSize(new Dimension(500,70 ));
-	//	frame.getContentPane().add(info);
-	}
+		resultsContainer = new Box(BoxLayout.Y_AXIS);
+		resultsContainer.setMinimumSize(new Dimension(200,30 ));
+		resultsContainer.setMaximumSize(new Dimension((int) (screenSize.width-100),screenSize.height/3 ));
+		resultsContainer.setPreferredSize(new Dimension((int) (screenSize.width/2),screenSize.height/3 ));
+		resultsContainer.setBorder(border);
+		frame.getContentPane().add(resultsContainer);
+		resultsContainer.setVisible(false);
+		}
 
 	private void setField(JComponent b, JPanel panel) {
 		b.setFont(new Font("Tahoma", Font.PLAIN, fontSize));
@@ -213,4 +212,16 @@ public class MainWindow2 {
 			}
 	    }
 	};
+	
+	private void setResultContainer(Order order) {
+	 JButton orderBut= new JButton();
+	 orderBut.setFont(new Font("Tahoma", Font.PLAIN, fontSize));
+	 orderBut.setMinimumSize(new Dimension(289,222 ));
+	 orderBut.setMaximumSize(new Dimension(screenSize.width/5,screenSize.height/5 ));
+	 orderBut.setPreferredSize(new Dimension(screenSize.width/5,screenSize.height/5 ));
+	 System.out.print(order.title());
+	 orderBut.setText(order.title());
+	 resultsContainer.add(orderBut);
+	 resultsContainer.setVisible(true);
+	}
 }

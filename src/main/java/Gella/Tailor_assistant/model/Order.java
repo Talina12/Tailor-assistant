@@ -195,5 +195,12 @@ public static Comparator<Order> idComparator = new Comparator<Order>() {
 	}
 };
 
+public String title() {
+	String str;
+	str = customer.getFirstName()+"  "+customer.getLastName()+'\n'
+	      +customer.getCellphone()+"  "+customer.getHomePhone();
+	return str;
+}
+
 
 }
