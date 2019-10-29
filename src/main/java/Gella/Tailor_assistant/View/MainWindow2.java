@@ -64,6 +64,7 @@ public class MainWindow2 {
 		frame.setBounds(20,10,screenSize.width-40, screenSize.height-60);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		fon = new Fon();
+		//fon.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 		frame.setContentPane(fon);
 		fontSize=screenSize.width/95;
 		border = BorderFactory.createEtchedBorder();
@@ -71,9 +72,10 @@ public class MainWindow2 {
 		hintWindow = new HintWindow();
 		
 		buttonsContainer = new Box(BoxLayout.X_AXIS);
-		buttonsContainer.setMinimumSize(new Dimension((int) (screenSize.width/4),screenSize.height/17 ));
-		buttonsContainer.setMaximumSize(new Dimension((int) (screenSize.width/2),screenSize.height/10 ));
-		buttonsContainer.setPreferredSize(new Dimension((int) (screenSize.width/2),screenSize.height/10 ));
+		buttonsContainer.setMinimumSize(new Dimension((int) (screenSize.width/4+40),screenSize.height/17+40 ));
+		buttonsContainer.setMaximumSize(new Dimension((int) (screenSize.width/2+40),screenSize.height/10+40 ));
+		buttonsContainer.setPreferredSize(new Dimension((int) (screenSize.width/2+40),screenSize.height/10+40 ));
+		buttonsContainer.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 		//buttons.setBackground(new Color(0,0,0,0));
 		newOrderButton = new JButton("New order");
 		newOrderButton.addActionListener(new ActionListener() {
@@ -95,9 +97,9 @@ public class MainWindow2 {
 		setButton(updateOrderButton, buttonsContainer);
 		frame.getContentPane().add(buttonsContainer);
 		fieldsContainer = new JPanel();
-		fieldsContainer.setMinimumSize(new Dimension(200,30 ));
-		fieldsContainer.setMaximumSize(new Dimension((int) (screenSize.width-100),screenSize.height/3 ));
-		fieldsContainer.setPreferredSize(new Dimension((int) (screenSize.width/2),screenSize.height/3 ));
+		fieldsContainer.setMinimumSize(new Dimension((int) (screenSize.width/4),screenSize.height/17 ));
+		fieldsContainer.setMaximumSize(new Dimension((int) (screenSize.width/2),screenSize.height/10 ));
+		fieldsContainer.setPreferredSize(new Dimension((int) (screenSize.width/2),screenSize.height/10 ));
 		fieldsContainer.setBorder(border);
 		orderNumLabel = new JLabel("Order Number");
 		orderNumField = new JTextField();
@@ -124,9 +126,7 @@ public class MainWindow2 {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				setResultContainer(dbHandler.getOrderById(Integer.parseInt(orderNumField.getText())));	}
-
-			
-		});
+        });
 		setField(orderNumLabel,fieldsContainer);
 		setField(orderNumField, fieldsContainer);
 		fieldsContainer.setVisible(false);
@@ -214,14 +214,39 @@ public class MainWindow2 {
 	};
 	
 	private void setResultContainer(Order order) {
-	 JButton orderBut= new JButton();
+	 
+		String html=
+				"<html><body>"
+				       + "<p><h4>"+order.getCustomer().getFirstName()+"   "+order.getCustomer().getLastName()+"</h4></p>"
+				   	   +"<div>"
+				   	   	+"<table>"
+				   	   +"<tr>"
+				   	   	+"<td style='width:50%'>"
+				   	      + "<ul>"
+		                  +"<li>Id: "+ order.getOrderNumber()+"</li>"
+		                  + "<li>"+order.getCustomer().getCellphone()+"  "+order.getCustomer().getHomePhone()+"</li>"
+		                  + "<li>Total price: "+order.getTotalPrice()+"</li>"
+		                  + "<li>Issue date: "+order.getIssueDate()+  "</li>"
+		                  +"</ul>"
+		                  +"</td>"
+				   	   	+"<td>"
+				   	       +order.getCustomer().getFirstName()+" gggh hjgjdgvbnb vnbmnm bnhdhggfjgkhjkj  "+order.getCustomer().getLastName()
+				   	   	+ "</td>"
+				   	   + "</tr>"
+				   	   +"</table>"
+				          
+				       +"</div>"
+				       + "<p>"+order.descriptionToString() +       "</p>"
+				+ "</body>";	
+	 JButton orderBut= new JButton(html);
 	 orderBut.setFont(new Font("Tahoma", Font.PLAIN, fontSize));
-	 orderBut.setMinimumSize(new Dimension(289,222 ));
-	 orderBut.setMaximumSize(new Dimension(screenSize.width/5,screenSize.height/5 ));
-	 orderBut.setPreferredSize(new Dimension(screenSize.width/5,screenSize.height/5 ));
-	 System.out.print(order.title());
-	 orderBut.setText(order.title());
+	 orderBut.setMinimumSize(new Dimension(600,300 ));
+	 orderBut.setMaximumSize(new Dimension(screenSize.width/3,screenSize.height/5 ));
+	 orderBut.setPreferredSize(new Dimension(screenSize.width/3,screenSize.height/5 ));
+	 // orderBut.setText(order.title());
 	 resultsContainer.add(orderBut);
 	 resultsContainer.setVisible(true);
 	}
+	
+	
 }
