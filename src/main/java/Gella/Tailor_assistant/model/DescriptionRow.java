@@ -7,22 +7,14 @@ package Gella.Tailor_assistant.model;
  */
 public class DescriptionRow implements Comparable<DescriptionRow>{
 	
-	/**
-	 * description of the item
-	 */
+	/**description of the item*/
 	private String des;
-	/**
-	 * price of the item
-	 */
+	/**price of the item*/
 	private Integer p;
-	/**
-	 * amount of class fields
-	 */
+	/**amount of class fields*/
 	private static int fieldCount=2; //number of fields
 
-	/**
-	 * creates a class with empty description and price 0
-	 */
+	/**creates a class with empty description and price 0*/
 	public DescriptionRow() {
 		des = new String();
 		p= new Integer(0);
@@ -42,6 +34,10 @@ public class DescriptionRow implements Comparable<DescriptionRow>{
 
 	public void setPrice(Integer p) {
 		this.p = p;
+	}
+	
+	public void setPrice(int p) {
+		this.p = new Integer(p);
 	}
 
 	/**

@@ -1,43 +1,40 @@
 package Gella.Tailor_assistant.model;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.logging.Logger;
 
 
 public class Order {
 	private int orderNumber;
-	/**
-	 * the day the order was accepted
-	 */
+	/**the day the order was accepted*/
 	private Date recDate;
 	private Customer customer;
 	private ArrayList<DescriptionRow>  description;
+	
+	/**separator followed by a string*/
+	private char strSeparator='|' ;
+	/**separator followed by a digit*/
+	private char numSeparator='~';
 	private float totalPrice;
-	/**
-	 * date when the order can be completed
-	 */
+	/**date when the order can be completed*/
 	private Date estimatedCompDate;
-	/**
-	 * number of fittings
-	 */
+	/** number of fittings*/
 	private int tryOn;
 	private float paid;
-	/**
-	 * time to complete the order in hours
-	 */
+	/**time to complete the order in hours*/
 	private float execTime;
 	private OrderStatus status;
-	/**
-	 * date of fitting
-	 */
+	/**date of fitting*/
 	private Date fitDay;
 	private Date issueDate;
-	private Event[] events;
+	private ArrayList<Event> events;
 	private static final int tryOnMax=4;
+	public static Logger log = Logger.getLogger("model.Order");
 	
-	/**
-	 * creates an object with empty and zero fields
-	 */
+	/**creates an object with empty and zero fields */
 	public Order() {
 		super();
 		orderNumber=0;
@@ -51,7 +48,7 @@ public class Order {
 		execTime=0;
 		fitDay= null;
 		issueDate=null;
-		events =new Event[0];
+		events =new ArrayList<Event>();
 		customer = new Customer();
 		}
 	
@@ -123,10 +120,10 @@ public class Order {
 	public void setIssueDate(Date issueDate) {
 		this.issueDate = issueDate;
 	}
-	public Event[] getEvents() {
+	public ArrayList<Event> getEvents() {
 		return events;
 	}
-	public void setEvents(Event[] event) {
+	public void setEvents(ArrayList<Event> event) {
 		this.events = event;
 	}
 	
@@ -173,12 +170,67 @@ public class Order {
     	  	 }
 	
  /**
-  * add all descriptions to one string and return it
+  * add all descriptions to one string with separators
+  * @return all description rows in one string with separators 
  */
     public String descriptionToString() {
 	 String str= new String();
-	 for (DescriptionRow d:description) str+=d.toString()+'\n';
+	 for (DescriptionRow d:description) {
+		 //Replace separators with spaces if they occur
+		 d.setItem(d.getItem().replace(strSeparator, ' '));
+		 d.setItem(d.getItem().replace(numSeparator, ' '));
+		 str+=d.getItem()+strSeparator+d.getPrice()+numSeparator;
+		 }
 	 return str;
  }
+
+/**creates description from the string  according to separators
+ * @return number of description items
+ * */
+    public int setDescription(String string) {
+		int endStr,endNum;
+		ArrayList<DescriptionRow> des=new ArrayList<DescriptionRow>();
+		while (string.length()>0) {
+    	 	endStr=string.indexOf(strSeparator);
+    	 	endNum=string.indexOf(numSeparator);
+    	if(endStr<0|endNum<0) { //if the end of the item description or the end of item price is not found, return the result
+    		description=des;
+    		return description.size();
+    		} 
+    	else {
+    		DescriptionRow row=new DescriptionRow(); 
+    		String str;
+    		//read  from the string the description  and the price of the item 
+    		row.setItem(string.substring(0, endStr-1));
+    		str = string.substring(endStr+1, endNum-1);
+    		try {
+    		row.setPrice(new Integer(str));
+    		}
+    		catch (NumberFormatException nex) {
+    			log.severe(nex.getClass() +" in setDescription(String str)");
+    			description=des;
+    			return description.size();
+    			}; 
+    		string = string.substring(endNum+1); //delete the read data from the string
+    		des.add(row);
+    		};
+    	}
+		description=des;
+    	return description.size();
+	}
+
+public static Comparator<Order> idComparator = new Comparator<Order>() {
+	@Override
+	public int compare(Order o1, Order o2) {
+    	return o1.getOrderNumber()-o2.getOrderNumber();
+	}
+};
+
+public String title() {
+	String str;
+	str = customer.getFirstName()+"  "+customer.getLastName()+'\n'
+	      +customer.getCellphone()+"  "+customer.getHomePhone();
+	return str;
+}
 
 }

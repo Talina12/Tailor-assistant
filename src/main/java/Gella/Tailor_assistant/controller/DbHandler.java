@@ -626,7 +626,7 @@ public void createEventsTable() {
              +  "duration integer,\n"
 		     +  "name string , \n"
 		     +  "description string, \n"
-		     +  "color_id,  \n"
+		     +  "color_id, string,  \n"
              + "FOREIGN KEY (id_order) REFERENCES Orders(id))";
 	try {
 		Statement stmt = connection.createStatement();
@@ -742,6 +742,54 @@ return data;
 log.severe(e.getMessage()+"  "+ e.getClass().toString());
 }
 return null;	// TODO Auto-generated method stub
+}
+
+/**
+ * 
+ * @param orderId
+ * @return null if there is no order with such id
+ */
+public Order getOrderById(int orderId) {
+	String sql = "SELECT Orders.id orders_id, id_customer, rec_date, description, total_price,estimated_comp_day, "
+			+ "try_on, paid, exec_time, status,fit_day, issue_date, first_name, last_name, "
+			+ "cellphone,home_phone  "
+			+ "FROM Orders INNER JOIN Customers on Customers.id=Orders.id_customer"
+	 		+ " WHERE Orders.id = ?";
+	
+try ( PreparedStatement stat  = this.connection.prepareStatement(sql)){
+// set the value
+stat.setInt(1,orderId);
+ResultSet rs  = stat.executeQuery();
+Order order=null;
+// loop through the result set
+if (rs.next()) {
+   order = new Order();
+   Customer customer = new Customer();
+   customer.setCellphone((rs.getString("cellphone")));
+   customer.setFirstName(rs.getString("first_name"));
+   customer.setHomePhone(rs.getString("home_phone"));
+   customer.setId(rs.getInt("id_customer"));
+   customer.setLastName(rs.getString("last_name"));
+   order.setCustomer(customer);
+   order.setDescription(rs.getString("description"));
+   order.setEstimatedCompTime(rs.getDate("estimated_comp_day"));
+   order.setExecTime(rs.getFloat("exec_time"));
+   order.setFitDay(rs.getDate("fit_day"));
+   order.setIssueDate(rs.getDate("issue_date"));
+   order.setOrderNumber(rs.getInt("orders_id"));
+   order.setPaid(rs.getInt("paid"));
+   order.setRecDate(rs.getDate("rec_date"));
+   order.setStatus(OrderStatus.valueOf(rs.getString("status")));
+   order.setTotalPrice(rs.getInt("total_price"));
+   order.setTryOn(rs.getInt("try_on"));
+   order.setEvents(getEventsByOrderId(order.getOrderNumber()));
+   }
+return order; 
+} catch (SQLException e) {
+log.severe(e.getMessage());
+e.printStackTrace();
+}
+return null;
 }
 }
 
