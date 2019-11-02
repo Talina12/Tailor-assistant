@@ -4,42 +4,37 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.logging.Logger;
 
 
 public class Order {
 	private int orderNumber;
-	/**
-	 * the day the order was accepted
-	 */
+	/**the day the order was accepted*/
 	private Date recDate;
 	private Customer customer;
 	private ArrayList<DescriptionRow>  description;
+	
+	/**separator followed by a string*/
+	private char strSeparator='|' ;
+	/**separator followed by a digit*/
+	private char numSeparator='~';
 	private float totalPrice;
-	/**
-	 * date when the order can be completed
-	 */
+	/**date when the order can be completed*/
 	private Date estimatedCompDate;
-	/**
-	 * number of fittings
-	 */
+	/** number of fittings*/
 	private int tryOn;
 	private float paid;
-	/**
-	 * time to complete the order in hours
-	 */
+	/**time to complete the order in hours*/
 	private float execTime;
 	private OrderStatus status;
-	/**
-	 * date of fitting
-	 */
+	/**date of fitting*/
 	private Date fitDay;
 	private Date issueDate;
 	private ArrayList<Event> events;
 	private static final int tryOnMax=4;
+	public static Logger log = Logger.getLogger("model.Order");
 	
-	/**
-	 * creates an object with empty and zero fields
-	 */
+	/**creates an object with empty and zero fields */
 	public Order() {
 		super();
 		orderNumber=0;
@@ -175,18 +170,53 @@ public class Order {
     	  	 }
 	
  /**
-  * add all descriptions to one string and return it
+  * add all descriptions to one string with separators
+  * @return all description rows in one string with separators 
  */
     public String descriptionToString() {
 	 String str= new String();
-	 for (DescriptionRow d:description) str+=d.toString()+'\n';
+	 for (DescriptionRow d:description) {
+		 //Replace separators with spaces if they occur
+		 d.setItem(d.getItem().replace(strSeparator, ' '));
+		 d.setItem(d.getItem().replace(numSeparator, ' '));
+		 str+=d.getItem()+strSeparator+d.getPrice()+numSeparator;
+		 }
 	 return str;
  }
 
-public void setDescription(String string) {
-	// TODO Auto-generated method stub
-	
-}
+/**creates description from the string  according to separators
+ * @return link to the created description  if the description could not be created returns an empty list
+ * */
+    public ArrayList<DescriptionRow> setDescription(String string) {
+		int endStr,endNum;
+		ArrayList<DescriptionRow> des=new ArrayList<DescriptionRow>();
+		while (string.length()>0) {
+    	 	endStr=string.indexOf(strSeparator);
+    	 	endNum=string.indexOf(numSeparator);
+    	if(endStr<0|endNum<0) { //if the end of the item description or the end of item price is not found, return the result
+    		description=des;
+    		return description;
+    		} 
+    	else {
+    		DescriptionRow row=new DescriptionRow(); 
+    		String str;
+    		//read  from the string the description  and the price of the item 
+    		row.setItem(string.substring(0, endStr-1));
+    		str = string.substring(endStr+1, endNum-1);
+    		try {
+    		row.setPrice(new Integer(str));
+    		}
+    		catch (NumberFormatException nex) {
+    			log.severe(nex.getClass() +" in setDescription(String str)");
+    			description=des;
+    			return description;
+    			}; 
+    		string = string.substring(endNum+1); //delete the read data from the string
+    		des.add(row);
+    		};
+    	}
+    	return description;
+	}
 
 public static Comparator<Order> idComparator = new Comparator<Order>() {
 	@Override
