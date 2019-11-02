@@ -193,7 +193,7 @@ public class Order {
 		while (string.length()>0) {
     	 	endStr=string.indexOf(strSeparator);
     	 	endNum=string.indexOf(numSeparator);
-    	if(endStr<0|endNum<0) { //if the end of the item description or the end of item price is not found, return the result
+    	if(endStr<=0|endNum<=0) { //if the end of the item description or the end of item price is not found, return the result
     		description=des;
     		return description.size();
     		} 
@@ -201,8 +201,8 @@ public class Order {
     		DescriptionRow row=new DescriptionRow(); 
     		String str;
     		//read  from the string the description  and the price of the item 
-    		row.setItem(string.substring(0, endStr-1));
-    		str = string.substring(endStr+1, endNum-1);
+    		row.setItem(string.substring(0, endStr));
+    		str = string.substring(endStr+1, endNum);
     		try {
     		row.setPrice(new Integer(str));
     		}

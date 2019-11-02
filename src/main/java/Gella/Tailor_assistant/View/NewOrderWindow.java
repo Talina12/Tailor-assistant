@@ -466,7 +466,6 @@ public class NewOrderWindow extends JFrame{
 			try {	
 			long duration=Math.round(Float.parseFloat(execTimeField.getText())*3600000); 
 			dates= calendarController.getFreeDates(duration);
-		//	for(Event d:dates) System.out.println(d.getStart().toString()+"  " + new Date (d.getStart().getTime()+d.getDuration()).toString());
 			if (dates.size()>0) {estimatedCompDateField.setValue(dates.get(dates.size()-1).getStart());
 			                     estimatedCompTimeField.setValue(dates.get(dates.size()-1).getStart());}
 			else JOptionPane.showMessageDialog(null,"could not find a suitable date");

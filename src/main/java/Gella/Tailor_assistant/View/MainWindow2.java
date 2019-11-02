@@ -6,6 +6,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Point;
@@ -134,10 +135,11 @@ public class MainWindow2 {
 		frame.getContentPane().add(fieldsContainer);
 		
 		resultsContainer = new Box(BoxLayout.Y_AXIS);
-		resultsContainer.setMinimumSize(new Dimension(200,30 ));
+		resultsContainer.setMinimumSize(new Dimension((int) (screenSize.width-100),screenSize.height/3 ));
 		resultsContainer.setMaximumSize(new Dimension((int) (screenSize.width-100),screenSize.height/3 ));
 		resultsContainer.setPreferredSize(new Dimension((int) (screenSize.width/2),screenSize.height/3 ));
 		resultsContainer.setBorder(border);
+		resultsContainer.setBackground(new Color(0,0,0,0));
 		frame.getContentPane().add(resultsContainer);
 		resultsContainer.setVisible(false);
 		}
@@ -217,10 +219,10 @@ public class MainWindow2 {
 	private void setResultContainer(Order order) {
 	    String htmlDes="<ul>";
 	    ArrayList<DescriptionRow> des=order.getDescription();
-	    for (DescriptionRow d:des)
-	    	htmlDes.concat("<li>"+d.getItem()+"  "+d.getPrice()+"</li>"); 
-	    htmlDes.concat("</ul>");
-		String html=
+	    for (DescriptionRow d:des) 
+	    	htmlDes=htmlDes.concat("<li>"+d.getItem()+"  "+d.getPrice()+"</li>"); 
+	    htmlDes=htmlDes.concat("</ul>");
+	    String html=
 		"<html><body>"
 			   + "<p><h4>"+order.getCustomer().getFirstName()+"   "+order.getCustomer().getLastName()+"</h4></p>"
 			   +"<div>"
@@ -234,7 +236,7 @@ public class MainWindow2 {
 		               + "<li>Issue date: "+order.getIssueDate()+  "</li>"
 		             +"</ul>"
 		           +"</td>"
-				   +"<td>" + htmlDes + "</td>"
+				   +"<td>" +htmlDes + "</td>"
 				  + "</tr>"
 				+"</table>"
 		       +"</div>"
@@ -242,8 +244,8 @@ public class MainWindow2 {
 	 JButton orderBut= new JButton(html);
 	 orderBut.setFont(new Font("Tahoma", Font.PLAIN, fontSize));
 	 orderBut.setMinimumSize(new Dimension(600,300 ));
-	 orderBut.setMaximumSize(new Dimension(screenSize.width/3,screenSize.height/5 ));
-	 orderBut.setPreferredSize(new Dimension(screenSize.width/3,screenSize.height/5 ));
+	 orderBut.setMaximumSize(new Dimension(screenSize.width/2,screenSize.height/4 ));
+	 orderBut.setPreferredSize(new Dimension(screenSize.width/2,screenSize.height/4 ));
 	 // orderBut.setText(order.title());
 	 resultsContainer.add(orderBut);
 	 resultsContainer.setVisible(true);
