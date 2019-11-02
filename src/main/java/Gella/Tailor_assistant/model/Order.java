@@ -185,9 +185,9 @@ public class Order {
  }
 
 /**creates description from the string  according to separators
- * @return link to the created description  if the description could not be created returns an empty list
+ * @return number of description items
  * */
-    public ArrayList<DescriptionRow> setDescription(String string) {
+    public int setDescription(String string) {
 		int endStr,endNum;
 		ArrayList<DescriptionRow> des=new ArrayList<DescriptionRow>();
 		while (string.length()>0) {
@@ -195,7 +195,7 @@ public class Order {
     	 	endNum=string.indexOf(numSeparator);
     	if(endStr<0|endNum<0) { //if the end of the item description or the end of item price is not found, return the result
     		description=des;
-    		return description;
+    		return description.size();
     		} 
     	else {
     		DescriptionRow row=new DescriptionRow(); 
@@ -209,13 +209,14 @@ public class Order {
     		catch (NumberFormatException nex) {
     			log.severe(nex.getClass() +" in setDescription(String str)");
     			description=des;
-    			return description;
+    			return description.size();
     			}; 
     		string = string.substring(endNum+1); //delete the read data from the string
     		des.add(row);
     		};
     	}
-    	return description;
+		description=des;
+    	return description.size();
 	}
 
 public static Comparator<Order> idComparator = new Comparator<Order>() {

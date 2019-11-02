@@ -31,6 +31,7 @@ import org.mortbay.log.Log;
 
 import Gella.Tailor_assistant.controller.DbHandler;
 import Gella.Tailor_assistant.model.Customer;
+import Gella.Tailor_assistant.model.DescriptionRow;
 import Gella.Tailor_assistant.model.Order;
 
 import javax.swing.BoxLayout;
@@ -214,30 +215,30 @@ public class MainWindow2 {
 	};
 	
 	private void setResultContainer(Order order) {
-	 
+	    String htmlDes="<ul>";
+	    ArrayList<DescriptionRow> des=order.getDescription();
+	    for (DescriptionRow d:des)
+	    	htmlDes.concat("<li>"+d.getItem()+"  "+d.getPrice()+"</li>"); 
+	    htmlDes.concat("</ul>");
 		String html=
-				"<html><body>"
-				       + "<p><h4>"+order.getCustomer().getFirstName()+"   "+order.getCustomer().getLastName()+"</h4></p>"
-				   	   +"<div>"
-				   	   	+"<table>"
-				   	   +"<tr>"
-				   	   	+"<td style='width:50%'>"
-				   	      + "<ul>"
-		                  +"<li>Id: "+ order.getOrderNumber()+"</li>"
-		                  + "<li>"+order.getCustomer().getCellphone()+"  "+order.getCustomer().getHomePhone()+"</li>"
-		                  + "<li>Total price: "+order.getTotalPrice()+"</li>"
-		                  + "<li>Issue date: "+order.getIssueDate()+  "</li>"
-		                  +"</ul>"
-		                  +"</td>"
-				   	   	+"<td>"
-				   	       +order.getCustomer().getFirstName()+" gggh hjgjdgvbnb vnbmnm bnhdhggfjgkhjkj  "+order.getCustomer().getLastName()
-				   	   	+ "</td>"
-				   	   + "</tr>"
-				   	   +"</table>"
-				          
-				       +"</div>"
-				       + "<p>"+order.descriptionToString() +       "</p>"
-				+ "</body>";	
+		"<html><body>"
+			   + "<p><h4>"+order.getCustomer().getFirstName()+"   "+order.getCustomer().getLastName()+"</h4></p>"
+			   +"<div>"
+				+"<table>"
+				  +"<tr>"
+				   +"<td style='width:50%'>"
+				   	 + "<ul>"
+		               +"<li>Id: "+ order.getOrderNumber()+"</li>"
+		               + "<li>"+order.getCustomer().getCellphone()+"  "+order.getCustomer().getHomePhone()+"</li>"
+		               + "<li>Total price: "+order.getTotalPrice()+"</li>"
+		               + "<li>Issue date: "+order.getIssueDate()+  "</li>"
+		             +"</ul>"
+		           +"</td>"
+				   +"<td>" + htmlDes + "</td>"
+				  + "</tr>"
+				+"</table>"
+		       +"</div>"
+			+ "</body>";
 	 JButton orderBut= new JButton(html);
 	 orderBut.setFont(new Font("Tahoma", Font.PLAIN, fontSize));
 	 orderBut.setMinimumSize(new Dimension(600,300 ));
