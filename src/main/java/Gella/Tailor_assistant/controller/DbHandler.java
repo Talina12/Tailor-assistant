@@ -791,5 +791,15 @@ e.printStackTrace();
 }
 return null;
 }
+
+public int updateOrder(Order order) {
+	// TODO Auto-generated method stub
+	return 0;
+}
+
+public void updateOrderwithoutEvents(Order order) {
+	// TODO Auto-generated method stub
+	
+}
 }
 

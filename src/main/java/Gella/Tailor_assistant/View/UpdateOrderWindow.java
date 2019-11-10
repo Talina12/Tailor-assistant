@@ -2,13 +2,17 @@ package Gella.Tailor_assistant.View;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.FocusTraversalPolicy;
 import java.awt.Font;
+import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -23,6 +27,7 @@ import javax.swing.BorderFactory;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -40,6 +45,7 @@ import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
+import javax.swing.table.AbstractTableModel;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
@@ -50,6 +56,8 @@ import javax.swing.text.DocumentFilter.FilterBypass;
 import Gella.Tailor_assistant.controller.CalendarController;
 import Gella.Tailor_assistant.controller.DbHandler;
 import Gella.Tailor_assistant.controller.GoogleCalendarController;
+import Gella.Tailor_assistant.model.Customer;
+import Gella.Tailor_assistant.model.DescriptionRow;
 import Gella.Tailor_assistant.model.Event;
 import Gella.Tailor_assistant.model.Order;
 import Gella.Tailor_assistant.model.OrderStatus;
@@ -93,11 +101,11 @@ public class UpdateOrderWindow extends JFrame {
 	private JLabel paidLabel;
 	private JLabel fitDateLabel;
 	private JLabel issueDateLabel;
-	private JButton submitButton;
+	private JButton updateButton;
 	private Border defaultBorder;
 	private HintWindow hintWindow;
 	private DbHandler dbHandler;
-	private Order newOrder;
+	private Order order;
 	private FocusTraversalPolicy focusPolicy;
 	public static Logger log = Logger.getLogger("View.UpdateOrderWindow");
 	private CalendarController calendarController;
@@ -105,12 +113,13 @@ public class UpdateOrderWindow extends JFrame {
 	private ArrayList<Event> dates;
 	private GoogleCalendarController googleCalendarController;
 	private Dimension frameSize;
+	private boolean rescheduled;
 	
 	
 	/**
 	 * Create the frame.
 	 */
-	public UpdateOrderWindow(Order order) {
+	public UpdateOrderWindow(Order upOrder) {
 		try {
 			dbHandler = DbHandler.getInstance();
 			googleCalendarController=GoogleCalendarController.getInstance();
@@ -119,6 +128,8 @@ public class UpdateOrderWindow extends JFrame {
 			JOptionPane.showMessageDialog(null,e3.getClass().toString()+"unable to connect to database");
 			log.severe("unable to connect to database");
 		}
+		order=upOrder;
+		rescheduled=false;
 		calendarController= CalendarController.getInstance();
 		int x=Math.round(Toolkit.getDefaultToolkit().getScreenSize().width*(float)(0.8));
 		int y=Math.round(Toolkit.getDefaultToolkit().getScreenSize().height*(float)(0.8));
@@ -143,7 +154,7 @@ public class UpdateOrderWindow extends JFrame {
 		contentPane.add(FirstNameLabel);
 		 
 		
-		firstNameField = new JTextField(order.getCustomer().getFirstName());
+		firstNameField = new JTextField(upOrder.getCustomer().getFirstName());
 		firstNameField.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		firstNameField.setBounds(122, 29, 135, 22);
 		contentPane.add(firstNameField);
@@ -154,13 +165,13 @@ public class UpdateOrderWindow extends JFrame {
 		LastNameLabel.setBounds(311, 29, 91, 22);
 		contentPane.add(LastNameLabel);
 		
-		lastNameField = new JTextField(order.getCustomer().getLastName());
+		lastNameField = new JTextField(upOrder.getCustomer().getLastName());
 		lastNameField.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		lastNameField.setBounds(412, 29, 135, 22);
 		contentPane.add(lastNameField);
 		lastNameField.setColumns(10);
 		
-		cellphoneField = new JTextField(order.getCustomer().getCellphone());
+		cellphoneField = new JTextField(upOrder.getCustomer().getCellphone());
 		cellphoneField.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		cellphoneField.setBounds(122, 78, 135, 22);
 		contentPane.add(cellphoneField);
@@ -176,7 +187,7 @@ public class UpdateOrderWindow extends JFrame {
 		cellPhoneLabel.setBounds(37, 78, 75, 22);
 		contentPane.add(cellPhoneLabel);
 		
-		homePhoneField = new JTextField(order.getCustomer().getHomePhone());
+		homePhoneField = new JTextField(upOrder.getCustomer().getHomePhone());
 		homePhoneField.setBounds(412, 78, 135, 22);
 		homePhoneField.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		contentPane.add(homePhoneField);
@@ -204,7 +215,7 @@ public class UpdateOrderWindow extends JFrame {
 		recDayField.setFocusLostBehavior(JFormattedTextField.REVERT);
 		contentPane.add(recDayField);
 		recDayField.setColumns(10);
-		recDayField.setValue(order.getRecDate()); //set default value by today's date
+		recDayField.setValue(upOrder.getRecDate()); //set default value by today's date
 		
 		tryOnLabel = new JLabel("Try-on");
 		tryOnLabel.setFont(new Font("Tahoma", Font.PLAIN, 14));
@@ -215,6 +226,7 @@ public class UpdateOrderWindow extends JFrame {
 		tryOnSpinner.setModel(new SpinnerNumberModel(0, 0, Order.getTryOnMax(), 1));
 		tryOnSpinner.setBounds(393, 131, 44, 30);
 		tryOnSpinner.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		tryOnSpinner.setValue(upOrder.getTryOn());
 		contentPane.add(tryOnSpinner);
 		
 		statusLabel = new JLabel("Status");
@@ -234,7 +246,7 @@ public class UpdateOrderWindow extends JFrame {
 		contentPane.add(descriptionLabel);
 		
 		descriptionTable = new JTable();
-		final DescriptionTableModel t= new DescriptionTableModel();
+		final DescriptionTableModel t= new DescriptionTableModel(upOrder.getDescription());
 		descriptionTable.setModel(t);
 		descriptionTable.setPreferredSize(new Dimension(700,300));
 		descriptionTable.setFont(new Font("Tahoma", Font.PLAIN, 14));
@@ -280,6 +292,7 @@ public class UpdateOrderWindow extends JFrame {
 		totalPriceField = new JFormattedTextField(f);
 		totalPriceField.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		totalPriceField.setBounds(656, 341, 75, 22);
+		totalPriceField.setValue(upOrder.getTotalPrice());
 		contentPane.add(totalPriceField);
 		totalPriceField.setColumns(10);
 		totalPriceField.addActionListener(textFieldActionListener);
@@ -311,6 +324,7 @@ public class UpdateOrderWindow extends JFrame {
 		execTimeField.setBounds(157, 341, 86, 22);
 		execTimeField.setColumns(10);
 		execTimeField.addActionListener(textFieldActionListener);
+		execTimeField.setValue(upOrder.getExecTime());
 		contentPane.add(execTimeField);
 		
 		calculateTimeButton = new JButton("Calculate");
@@ -341,6 +355,7 @@ public class UpdateOrderWindow extends JFrame {
 		}
 		estimatedCompDateField.setBounds(228, 386, 86, 22);
 		estimatedCompDateField.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		estimatedCompDateField.setValue(upOrder.getEvents().get((upOrder.getEvents().size()-1)).getEnd());
 		contentPane.add(estimatedCompDateField);
 		estimatedCompDateField.setColumns(10);
 		
@@ -354,6 +369,7 @@ public class UpdateOrderWindow extends JFrame {
 		}
 		estimatedCompTimeField.setBounds(318, 386, 86, 22);
 		estimatedCompTimeField.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		estimatedCompTimeField.setValue(upOrder.getEvents().get((upOrder.getEvents().size()-1)).getEnd());
 		contentPane.add(estimatedCompTimeField);
 		estimatedCompTimeField.setColumns(10);
 		
@@ -366,7 +382,9 @@ public class UpdateOrderWindow extends JFrame {
 			long duration=Math.round(Float.parseFloat(execTimeField.getText())*3600000); 
 			dates= calendarController.getFreeDates(duration);
 			if (dates.size()>0) {estimatedCompDateField.setValue(dates.get(dates.size()-1).getStart());
-			                     estimatedCompTimeField.setValue(dates.get(dates.size()-1).getStart());}
+			                     estimatedCompTimeField.setValue(dates.get(dates.size()-1).getStart());
+			                     rescheduled=true;
+			                     }
 			else JOptionPane.showMessageDialog(null,"could not find a suitable date");
 			}
 			catch(RuntimeException r) {JOptionPane.showMessageDialog(null,"not valid value in Execution time");
@@ -394,6 +412,7 @@ public class UpdateOrderWindow extends JFrame {
 		}
 		fitDayField.setBounds(228, 431, 76, 22);
 		fitDayField.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		fitDayField.setValue(upOrder.getFitDay());
 		contentPane.add(fitDayField);
 		fitDayField.setColumns(10);
 		
@@ -405,7 +424,7 @@ public class UpdateOrderWindow extends JFrame {
 		paidField = new JFormattedTextField(new DecimalFormat());
 		paidField.setBounds(86, 521, 75, 22);
 		paidField.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		paidField.setValue(0);
+		paidField.setValue(upOrder.getPaid());
 		contentPane.add(paidField);
 		paidField.setColumns(10);
 		
@@ -423,36 +442,129 @@ public class UpdateOrderWindow extends JFrame {
 			}
 		issueDateField.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		issueDateField.setBounds(133, 476, 76, 22);
+		issueDateField.setValue(upOrder.getIssueDate());
 		contentPane.add(issueDateField);
 		issueDateField.setColumns(10);
 		
-		submitButton= new JButton("Submit");
-		submitButton.setFont(new Font("Tahoma", Font.PLAIN, 17));
-		submitButton.setBounds(351, 513, 309, 30);
-		submitButton.addActionListener(new ActionListener() {
+		updateButton= new JButton("Update");
+		updateButton.setFont(new Font("Tahoma", Font.PLAIN, 17));
+		updateButton.setBounds(351, 513, 309, 30);
+		updateButton.addActionListener(new ActionListener() {
             @Override
 			public void actionPerformed(ActionEvent arg0) {
-			 JTextField field= checkData();
-			 if (field!=null) {
-				 field.requestFocus(); 
-				 field.setBorder(BorderFactory.createLineBorder(Color.RED));
-				 Toolkit.getDefaultToolkit().beep();
-				  }
-			 else {
-				 setOrder(newOrder);
-				 int id= dbHandler.addOrder(newOrder);
+			 setOrder(order);
+			 if(rescheduled) {	
+			     int id= dbHandler.updateOrder(order);
 				 for (Event ev: dbHandler.getEventsByOrderId(id))
-				   googleCalendarController.addEvent(ev);	 
+				   googleCalendarController.addEvent(ev);	
+			 }
+			 else dbHandler.updateOrderwithoutEvents(order);
 				 dispose();
-				 } 
+				
 			}});
 		
-		contentPane.add(submitButton);
+		contentPane.add(updateButton);
 		
 		scrollContentPane = new JScrollPane(contentPane);
 		rootContentPane.add(scrollContentPane,BorderLayout.CENTER);
 		focusPolicy = this.getFocusTraversalPolicy();
 	}
-	}
+	
 
+/**
+ * sets hintWindow parameters and data for display
+ * @param d data to display in hintWindow
+ * @param tf field associated with the hint
+ */
+private void setHintWindow(ArrayList d, JTextField tf) {
+  if (d.size()>0) {
+	    Point point;
+		if (d.get(0) instanceof Customer) {
+	    hintWindow.getHintTable().setModel(new HintCustTableModel(d));
+		point = tf.getLocationOnScreen();
+		}
+		else {hintWindow.getHintTable().setModel(new HintDesTableModel(d));
+		point = descriptionTable.getLocationOnScreen();
+		point.y=point.y+descriptionTable.getSelectedRow()*18;
+		}
+		hintWindow.getHintTable().setPreferredSize(new Dimension(200, d.size()*18));
+		hintWindow.getHintTable().changeSelection(0, 0, false, false);
+		int x= Math.toIntExact(Math.round(point.getX()));
+		int y = Math.toIntExact(Math.round(point.getY()));
+		hintWindow.setBounds(x,y+25,300,d.size()*18+20);
+		hintWindow.setVisible(true); 
+		}
+		else hintWindow.setVisible(false);	
+}
+
+private ActionListener tableCellActionListener = new ActionListener() {
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		if (hintWindow.isVisible()) {
+		 if(hintWindow.getHintTable().getModel() instanceof HintDesTableModel) {
+	    	DescriptionRow d;
+			  d=((HintDesTableModel) hintWindow.getHintTable().getModel()).getDescriptionRow(hintWindow.getHintTable().getSelectedRow());
+			  setDesc(d);
+			  hintWindow.setVisible(false);
+			  }
+			  else {log.warning("HintTableModel is not instance of HintDesTableModel");
+			  hintWindow.setVisible(false);}
+		}
+	}
+    };
+    
+    private FocusAdapter textFieldFocusAdapter = new FocusAdapter() {
+		public void focusLost(FocusEvent e) {
+			hintWindow.setVisible(false);
+			}
+	};
+	
+/**
+	 * moves focus to the next field when a value is entered
+ */
+ private ActionListener textFieldActionListener = new ActionListener() {
+        @Override
+		public void actionPerformed(ActionEvent arg0) {
+	    	((JComponent) arg0.getSource()).setBorder(defaultBorder);
+			focusPolicy.getComponentAfter(UpdateOrderWindow.this, (Component) arg0.getSource()).requestFocus();
+		    }
+ };	
+ 
+ public void setOrder(Order newOrder) {
+	 newOrder.getCustomer().setFirstName(firstNameField.getText());
+	 newOrder.getCustomer().setLastName(lastNameField.getText());
+	 newOrder.getCustomer().setCellphone(cellphoneField.getText());
+	 newOrder.getCustomer().setHomePhone(homePhoneField.getText());
+	 newOrder.setRecDate((Date) recDayField.getValue());
+	 newOrder.setDescription(((DescriptionTableModel) descriptionTable.getModel()).getData());
+	 newOrder.setTotalPrice(Float.parseFloat(totalPriceField.getText()));
+	 if ((estimatedCompDateField).getValue()!= null) 
+		 newOrder.setEstimatedCompTime((Date) ((JFormattedTextField) estimatedCompDateField).getValue());
+	 else newOrder.setEstimatedCompTime(null);
+	 newOrder.setTryOn(((Integer) tryOnSpinner.getValue()).intValue());
+	 newOrder.setPaid(Float.parseFloat(paidField.getText()));
+	 newOrder.setExecTime(Float.parseFloat(execTimeField.getText()));
+	 newOrder.setStatus(OrderStatus.valueOfTitle((String)statusComboBox.getSelectedItem()));
+	 if (fitDayField.getValue()!=null) 
+		 newOrder.setFitDay((Date) fitDayField.getValue());
+	 else newOrder.setFitDay(null);
+	 if (issueDateField.getValue()!=null)
+		 newOrder.setIssueDate((Date) issueDateField.getValue());
+	 else newOrder.setIssueDate(null);
+	 if(rescheduled) {
+	 for(Event i:dates )
+	   i.setName(newOrder.getCustomer().toString()+ " "+ newOrder.getTotalPrice());
+	 newOrder.setEvents(dates);
+	 }
+	}
+ 
+ /**
+  * enters the value of param  into the table
+ */
+   protected void setDesc(DescriptionRow d) {
+   int i=descriptionTable.getSelectedRow();
+   descriptionTable.setValueAt(d.getItem(), i, 0);
+   descriptionTable.setValueAt(d.getPrice(), i, 1);
+   ((AbstractTableModel) descriptionTable.getModel()).fireTableCellUpdated( i, 1);
+ }
 }

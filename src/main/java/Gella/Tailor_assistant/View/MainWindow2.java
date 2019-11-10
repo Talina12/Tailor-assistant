@@ -158,7 +158,7 @@ public class MainWindow2 {
 		return frame;
 	}
 
-	private void setResultContainer(Order order) {
+	private void setResultContainer(final Order order) {
 	    String htmlDes="<ul>";
 	    ArrayList<DescriptionRow> des=order.getDescription();
 	    for (DescriptionRow d:des) 
@@ -188,6 +188,13 @@ public class MainWindow2 {
 	 orderBut.setMinimumSize(new Dimension(600,300 ));
 	 orderBut.setMaximumSize(new Dimension(screenSize.width/2,screenSize.height/4 ));
 	 orderBut.setPreferredSize(new Dimension(screenSize.width/2,screenSize.height/4 ));
+	 orderBut.addActionListener(new ActionListener() {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			UpdateOrderWindow updateOrderWindow = new UpdateOrderWindow(order);
+			updateOrderWindow.setVisible(true);
+		}
+	});
 	 // orderBut.setText(order.title());
 	 resultsContainer.add(orderBut);
 	 resultsContainer.setVisible(true);

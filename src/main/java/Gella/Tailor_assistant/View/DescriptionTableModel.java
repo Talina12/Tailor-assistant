@@ -21,6 +21,13 @@ public class DescriptionTableModel extends AbstractTableModel{
 	    data =new ArrayList<DescriptionRow>();
 		data.add(new DescriptionRow());
 		}
+	
+	/** Creates a new object with data from the description. if null is passed creates new empty object*/
+	public DescriptionTableModel (ArrayList<DescriptionRow>  description) {
+		if (description!= null) data =description;
+		else data =new ArrayList<DescriptionRow>();
+		if (data.size()==0) data.add(new DescriptionRow());
+	}
 
 	
 
