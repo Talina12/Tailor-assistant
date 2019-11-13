@@ -42,7 +42,7 @@ public class DbHandler {
 	 */
 	private static String CON_STR ; 
 	private static DbHandler instance = null;
-	private String info;
+	//private String info;
 	Logger log;
 	 
 	public static synchronized DbHandler getInstance()  {
@@ -71,11 +71,11 @@ public class DbHandler {
         createOrderTable();
         createDescriptionTable();
         createEventsTable();
-        info =new String();
+       // info =new String();
         log=Logger.getLogger("Gella.Tailor_assistant.controller.DbHandler");
         }catch(SQLException s){
           log.severe(s.getMessage()+"  "+s.getClass().toString());
-          JOptionPane.showMessageDialog(null,s.getClass().toString()+"unable to connect to database");
+          JOptionPane.showMessageDialog(null,s.getClass().toString()+"unable  connect to database");
         }
         }
    
@@ -139,10 +139,10 @@ public class DbHandler {
     	   Customer cust  = order.getCustomer();
     	   int custId=getCustomerId(cust);
     	   if (custId==0)
-    		   {info=info+"Customer not exist"+ '\n';
+    		   {//info=info+"Customer not exist"+ '\n';
     		    custId=addNewCustomer(cust); //TODO handle exceptions if cust don't added
     		    }
-    	   else info=info+"Customer already exists"+'\n';
+    	   else //info=info+"Customer already exists"+'\n';
     	   statement.setInt(1, custId);
            java.sql.Date rd = new java.sql.Date(order.getRecDate().getTime());
            statement.setDate(2,  rd);
@@ -292,7 +292,7 @@ public class DbHandler {
 			statement.setString(3, cust.getCellphone());
 			statement.setString(4,cust.getHomePhone());
 			statement.execute();
-			info = info+"Customer added "+ '\n';
+			//info = info+"Customer added "+ '\n';
 			ResultSet rs = statement.getGeneratedKeys();
             int customerId = 0;
             if (rs.next()) {
@@ -337,9 +337,9 @@ public class DbHandler {
     	{int desId = getDescriptionRowId(des.get(i));
     	 if (desId==0) 
     	 {desId=addDescriptionRow(des.get(i));
-    	  info = info+"description added "+ '\n';
+    	 // info = info+"description added "+ '\n';
     	 }
-    	 else info = info+"description already exists"+'\n';
+    	 else ///info = info+"description already exists"+'\n';
     	 idString = idString+ String.valueOf(desId)+' '; 
     	};
     	return idString;
@@ -610,11 +610,11 @@ try ( PreparedStatement stat  = this.connection.prepareStatement(sql)){
 return null;
 	}
    
-    public void resetInfo() {
-    	info ="";
-    }
+   // public void resetInfo() {
+   // 	info ="";
+   // }
     
- public String getInfo() {return info;}
+ //public String getInfo() {return info;}
  
 
 public void createEventsTable() {
@@ -793,8 +793,26 @@ return null;
 }
 
 public int updateOrder(Order order) {
-	// TODO Auto-generated method stub
-	return 0;
+	String orderStr = "UPDATE Orders SET  rec_date=?, description=?, total_price=?, estimated_comp_day=?, try_on=?, paid=?, exec_time=?,"
+			                         + "status=?, fit_day=?, issue_date=? WHERE id = ?";
+	String customerStr="";
+try (PreparedStatement stat1=this.connection.prepareStatement(orderStr);
+	 PreparedStatement stat2=this.connection.prepareStatement(customerStr)){
+	stat1.setDate(1, new java.sql.Date(order.getRecDate().getTime())); //TODO check for null pointer exception
+	stat1.setString(2, order.descriptionToString());
+	stat1.setFloat(3, order.getTotalPrice());
+	stat1.setDate(4, new java.sql.Date(order.getEstimatedCompTime().getTime()));
+	stat1.setInt(5, order.getTryOn());
+	stat1.setFloat(6, order.getPaid());
+	stat1.setFloat(7, order.getExecTime());
+	stat1.setString(8, order.getStatus().toString());
+	stat1.setDate(9, new java.sql.Date (order.getFitDay().getTime()));
+	
+}
+catch (SQLException e) {
+log.severe(e.getMessage());
+e.printStackTrace();
+}
 }
 
 public void updateOrderwithoutEvents(Order order) {
