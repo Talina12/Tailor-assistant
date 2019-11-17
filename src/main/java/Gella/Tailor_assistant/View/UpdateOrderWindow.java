@@ -380,7 +380,7 @@ public class UpdateOrderWindow extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 			try {	
 			long duration=Math.round(Float.parseFloat(execTimeField.getText())*3600000); 
-			dates= calendarController.getFreeDates(duration);
+			dates= calendarController.getFreeDates(duration,order);
 			if (dates.size()>0) {estimatedCompDateField.setValue(dates.get(dates.size()-1).getStart());
 			                     estimatedCompTimeField.setValue(dates.get(dates.size()-1).getStart());
 			                     rescheduled=true;
@@ -454,7 +454,8 @@ public class UpdateOrderWindow extends JFrame {
 			public void actionPerformed(ActionEvent arg0) {
 			 setOrder(order);
 			 if(rescheduled) {	
-			     int id= dbHandler.updateOrder(order);
+				 int id= dbHandler.updateOrder(order);
+				 if(id>0)
 				 for (Event ev: dbHandler.getEventsByOrderId(id))
 				   googleCalendarController.addEvent(ev);	
 			 }
@@ -552,8 +553,10 @@ private ActionListener tableCellActionListener = new ActionListener() {
 		 newOrder.setIssueDate((Date) issueDateField.getValue());
 	 else newOrder.setIssueDate(null);
 	 if(rescheduled) {
-	 for(Event i:dates )
+	 for(Event i:dates ) {
 	   i.setName(newOrder.getCustomer().toString()+ " "+ newOrder.getTotalPrice());
+	   i.setOrderId(newOrder.getOrderNumber());
+	   }
 	 newOrder.setEvents(dates);
 	 }
 	}

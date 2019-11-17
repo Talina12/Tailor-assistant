@@ -33,10 +33,7 @@ import Gella.Tailor_assistant.model.*;
  */
 public class DbHandler {
     
-	/**
-	 * The object in which the database connection will be stored
-	 */
-    private Connection connection;
+	
 	/**
 	 * Constant in which the connection address is stored
 	 */
@@ -60,12 +57,10 @@ public class DbHandler {
     * @throws SQLException
     */
 	private DbHandler(){
-        try {
-		CON_STR=Settings.getCON_STR();
+       CON_STR=Settings.getCON_STR();
 		// Register the driver
-        DriverManager.registerDriver(new JDBC());
-        //connecting to the database
-        this.connection = DriverManager.getConnection(CON_STR);
+       try { 
+       DriverManager.registerDriver(new JDBC());
         //create tables if they don't exist
         createCustomerTable();
         createOrderTable();
@@ -78,6 +73,17 @@ public class DbHandler {
           JOptionPane.showMessageDialog(null,s.getClass().toString()+"unable  connect to database");
         }
         }
+	
+	private Connection connect() {
+       Connection conn = null;
+        try {
+            conn = DriverManager.getConnection(CON_STR);
+        } catch (SQLException e) {
+        	log.severe(e.getMessage()+"  "+e.getClass().toString());
+            JOptionPane.showMessageDialog(null,e.getClass().toString()+"unable  connect to database");
+        }
+        return conn;
+    }
    
 	/**
 	 * returns list of all orders as an string array
@@ -87,7 +93,7 @@ public class DbHandler {
 	    String sql= "SELECT id, id_customer, rec_date, description, total_price, estimated_comp_day,"
 	    		+ " try_on, paid, exec_time, status, fit_day, issue_date, id_event FROM Orders ORDER BY id";
        
-       try (Statement statement = this.connection.createStatement()) {
+       try (Statement statement = this.connect().createStatement()) {
            //  upload to ArrayList orders obtained from the database.
            ArrayList<String[]> orders = new ArrayList<String[]>();
            ResultSet resultSet = statement.executeQuery(sql);
@@ -130,7 +136,7 @@ public class DbHandler {
      */
     public int addOrder(Order order) {
        // prepare the INSERT statement
-       try (PreparedStatement statement = this.connection.prepareStatement(
+       try (PreparedStatement statement = this.connect().prepareStatement(
                        "INSERT INTO Orders(`id_customer`, `rec_date`,`description`,"
                        + "`total_price`,`estimated_comp_day`,`try_on`,`paid`,`exec_time`,`status`,"
                        + "`fit_day`,`issue_date`) " +
@@ -184,10 +190,9 @@ public class DbHandler {
    }
    
      private void addEvent(Event e) {
-    	 try {
- 			PreparedStatement statement = this.connection.prepareStatement(
+    	 try (PreparedStatement statement = this.connect().prepareStatement(
  			         "INSERT INTO Events(`id_order`,`start`,`duration`,`name`,`id_google`, "
- 			         + "`description`, `color_id`)  VALUES(?,?,?,?,?,?,?)") ;
+ 			         + "`description`, `color_id`)  VALUES(?,?,?,?,?,?,?)")){
  			statement.setInt(1, e.getOrderId());
  			java.sql.Date rd = new java.sql.Date(e.getStart().getTime());
  			statement.setDate(2,rd);
@@ -223,8 +228,7 @@ public class DbHandler {
     		     + "    fit_day integer, \n"
                  + "    issue_date integer, \n"
     		     + "FOREIGN KEY (id_customer) REFERENCES Customers(id))";
-    	try {
-			Statement stmt = connection.createStatement();
+    	try (Statement stmt = connect().createStatement()){
 			// create a new table
             stmt.execute(sqiStat);
 		} catch (SQLException e) {
@@ -244,8 +248,7 @@ public class DbHandler {
     		     + "    last_name text ,\n"
                  + "    cellphone text,\n"
     		     + "    home_phone text \n);";
-    	try {
-			Statement stmt = connection.createStatement();
+    	try (Statement stmt = connect().createStatement()){
 			// create a new table
             stmt.execute(sqiStat);
 		} catch (SQLException e) {
@@ -261,9 +264,8 @@ public class DbHandler {
       */
      public int getCustomerId(Customer cust) {
     	 String sql = "SELECT id FROM Customers WHERE first_name=? AND last_name=? AND cellphone=? AND home_phone=?";
-     	 try {
-    	    PreparedStatement statement  = this.connection.prepareStatement(sql);
-			statement.setString(1, cust.getFirstName());
+     	 try (PreparedStatement statement  = this.connect().prepareStatement(sql)){
+    	    statement.setString(1, cust.getFirstName());
 			statement.setString(2,cust.getLastName());
 			statement.setString(3,cust.getCellphone());
 			statement.setString(4, cust.getHomePhone());
@@ -283,10 +285,9 @@ public class DbHandler {
       * @returns id of customer added or 0 if failed
       */
   public   int addNewCustomer(Customer cust) {
-    	 try {
-			PreparedStatement statement = this.connection.prepareStatement(
-			         "INSERT INTO Customers(`first_name`,`last_name`, `cellphone`,`home_phone`) " +
-			          "VALUES(?, ?, ?, ?)",Statement.RETURN_GENERATED_KEYS) ;
+    	 try (PreparedStatement statement = this.connect().prepareStatement(
+		         "INSERT INTO Customers(`first_name`,`last_name`, `cellphone`,`home_phone`) " +
+				          "VALUES(?, ?, ?, ?)",Statement.RETURN_GENERATED_KEYS)){
 			statement.setString(1, cust.getFirstName());
 			statement.setString(2,cust.getLastName());
 			statement.setString(3, cust.getCellphone());
@@ -314,8 +315,7 @@ public class DbHandler {
     		     + "	id integer PRIMARY KEY,\n"
                  + "    item text ,\n"
     		     + "    price integer \n);";
-    	try {
-			Statement stmt = connection.createStatement();
+    	try (Statement stmt = connect().createStatement()){
 			// create a new table
             stmt.execute(sqiStat);
 		} catch (SQLException e) {
@@ -352,9 +352,8 @@ public class DbHandler {
      */
     public int getDescriptionRowId(DescriptionRow row) {
     	String sql = "SELECT id FROM Descriptions WHERE item=? AND price=? ";
-    	 try {
-   	    PreparedStatement statement  = this.connection.prepareStatement(sql);
-			statement.setString(1, row.getItem());
+    	 try (PreparedStatement statement  = this.connect().prepareStatement(sql)){
+   	        statement.setString(1, row.getItem());
 			statement.setInt(2,row.getPrice());
 			ResultSet rs  = statement.executeQuery();
 			if (rs.next()) return rs.getInt("id");
@@ -372,10 +371,9 @@ public class DbHandler {
      * @return id of description added or 0 if fail
      */
     public int addDescriptionRow(DescriptionRow row) {
-    	try {
-			PreparedStatement statement = this.connection.prepareStatement(
-			         "INSERT INTO Descriptions(`item`,`price`) " +
-			          "VALUES(?, ?)",Statement.RETURN_GENERATED_KEYS) ;
+    	try (PreparedStatement statement = this.connect().prepareStatement(
+		         "INSERT INTO Descriptions(`item`,`price`) " +
+				          "VALUES(?, ?)",Statement.RETURN_GENERATED_KEYS)){
 			statement.setString(1, row.getItem());
 			statement.setInt(2,row.getPrice());
 			statement.execute();
@@ -399,7 +397,7 @@ public class DbHandler {
     public String[][] getArrayOfCustomers() {
 		String sql= "SELECT id, first_name, last_name, cellphone, home_phone FROM Customers ORDER BY id";
        
-       try (Statement statement = this.connection.createStatement()) {
+       try (Statement statement = this.connect().createStatement()) {
            //  upload to ArrayList orders obtained from the database.
            ArrayList<String[]> customers = new ArrayList<String[]>();
            ResultSet resultSet = statement.executeQuery(sql);
@@ -428,7 +426,7 @@ public class DbHandler {
     public String[][] getArrayOfDescriptions() {
 		String sql= "SELECT id, item, price FROM Descriptions ORDER BY id";
 	       
-	       try (Statement statement = this.connection.createStatement()) {
+	       try (Statement statement = this.connect().createStatement()) {
 	           //  upload to ArrayList orders obtained from the database.
 	           ArrayList<String[]> descriptions = new ArrayList<String[]>();
 	           ResultSet resultSet = statement.executeQuery(sql);
@@ -457,7 +455,7 @@ public class DbHandler {
 		 String sql = "SELECT id, first_name, last_name, cellphone, home_phone FROM Customers "
 		 		+ " WHERE first_name LIKE ?";
 
-      try ( PreparedStatement stat  = this.connection.prepareStatement(sql)){
+      try ( PreparedStatement stat  = this.connect().prepareStatement(sql)){
        // set the value
       stat.setString(1,str+"%");
       ResultSet rs  = stat.executeQuery();
@@ -490,7 +488,7 @@ public class DbHandler {
 		String sql = "SELECT id, first_name, last_name, cellphone, home_phone FROM Customers "
 		 		+ " WHERE last_name LIKE ?";
 
-try ( PreparedStatement stat  = this.connection.prepareStatement(sql)){
+try ( PreparedStatement stat  = this.connect().prepareStatement(sql)){
    // set the value
    stat.setString(1,str+"%");
    ResultSet rs  = stat.executeQuery();
@@ -523,7 +521,7 @@ return null;
 		String sql = "SELECT id, first_name, last_name, cellphone, home_phone FROM Customers "
 		 		+ " WHERE cellphone LIKE ?";
 
-try ( PreparedStatement stat  = this.connection.prepareStatement(sql)){
+try ( PreparedStatement stat  = this.connect().prepareStatement(sql)){
    // set the value
    stat.setString(1,str+"%");
    ResultSet rs  = stat.executeQuery();
@@ -556,7 +554,7 @@ return null;
 		String sql = "SELECT id, first_name, last_name, cellphone, home_phone FROM Customers "
 		 		+ " WHERE home_phone LIKE ?";
 
-try ( PreparedStatement stat  = this.connection.prepareStatement(sql)){
+try ( PreparedStatement stat  = this.connect().prepareStatement(sql)){
    // set the value
    stat.setString(1,str+"%");
    ResultSet rs  = stat.executeQuery();
@@ -589,7 +587,7 @@ return null;
 		String sql = "SELECT id, item, price FROM Descriptions "
 		 		+ " WHERE item LIKE ?";
 
-try ( PreparedStatement stat  = this.connection.prepareStatement(sql)){
+try ( PreparedStatement stat  = this.connect().prepareStatement(sql)){
    // set the value
    stat.setString(1,str+"%");
    ResultSet rs  = stat.executeQuery();
@@ -628,8 +626,7 @@ public void createEventsTable() {
 		     +  "description string, \n"
 		     +  "color_id, string,  \n"
              + "FOREIGN KEY (id_order) REFERENCES Orders(id))";
-	try {
-		Statement stmt = connection.createStatement();
+	try (Statement stmt = connect().createStatement()){
 		// create a new table
        stmt.execute(sqiStat);
 	} catch (SQLException e) {
@@ -643,7 +640,7 @@ public ArrayList<Event> getEventsByGoogleId(String id) {
 	String sql = "SELECT id, id_order, id_google, start, duration, name, description, color_id FROM Events "
 	 		+ " WHERE id_google LIKE ?";
 
-try ( PreparedStatement stat  = this.connection.prepareStatement(sql)){
+try ( PreparedStatement stat  = this.connect().prepareStatement(sql)){
 // set the value
 stat.setString(1,id);
 ResultSet rs  = stat.executeQuery();
@@ -670,7 +667,7 @@ return null;
 
 ArrayList<Event> getEvents(){
  String sql= "SELECT id, id_order, id_google, start, duration, name, description, color_id FROM Events ORDER BY id";
- try (Statement statement = this.connection.createStatement()) {
+ try (Statement statement = this.connect().createStatement()) {
    //  upload to ArrayList orders obtained from the database.
    ArrayList<Event> events = new ArrayList<Event>();
    ResultSet resultSet = statement.executeQuery(sql);
@@ -697,9 +694,7 @@ ArrayList<Event> getEvents(){
 public void updateEvent(Event lev) {
 	// TODO Auto-generated method stub
  String sql = "UPDATE events SET id_google = ? ,start = ?, duration=?, name=?, description=?, color_id=? WHERE id = ?";
- PreparedStatement pstmt;
-try {
-	pstmt = this.connection.prepareStatement(sql);
+ try (PreparedStatement pstmt = this.connect().prepareStatement(sql)){
 	pstmt.setString(1, lev.getGoogleId());
 	java.sql.Date d = new java.sql.Date(lev.getStart().getTime());
 	pstmt.setDate(2, d);
@@ -719,7 +714,7 @@ public ArrayList<Event> getEventsByOrderId(int id) {
 	String sql = "SELECT id, id_order, id_google, start, duration, name, description, color_id "
 			+ "FROM Events  WHERE id_order LIKE ?";
 
-try ( PreparedStatement stat  = this.connection.prepareStatement(sql)){
+try ( PreparedStatement stat  = this.connect().prepareStatement(sql)){
 // set the value
 stat.setInt(1,id);
 ResultSet rs  = stat.executeQuery();
@@ -756,7 +751,7 @@ public Order getOrderById(int orderId) {
 			+ "FROM Orders INNER JOIN Customers on Customers.id=Orders.id_customer"
 	 		+ " WHERE Orders.id = ?";
 	
-try ( PreparedStatement stat  = this.connection.prepareStatement(sql)){
+try ( PreparedStatement stat  = this.connect().prepareStatement(sql)){
 // set the value
 stat.setInt(1,orderId);
 ResultSet rs  = stat.executeQuery();
@@ -792,12 +787,18 @@ e.printStackTrace();
 return null;
 }
 
+/**update order , customer and events(deletes previous events and sets new
+ * @return id of updated order or 0 if failed**/
 public int updateOrder(Order order) {
 	String orderStr = "UPDATE Orders SET  rec_date=?, description=?, total_price=?, estimated_comp_day=?, try_on=?, paid=?, exec_time=?,"
 			                         + "status=?, fit_day=?, issue_date=? WHERE id = ?";
-	String customerStr="";
-try (PreparedStatement stat1=this.connection.prepareStatement(orderStr);
-	 PreparedStatement stat2=this.connection.prepareStatement(customerStr)){
+	String customerStr="UPDATE Customers SET first_name=?, last_name=?, cellphone=?, home_phone=? WHERE id=?";
+	String delEvStr="DELETE FROM Events WHERE id_order = ?";
+	Connection conn=this.connect();
+try (PreparedStatement stat1=conn.prepareStatement(orderStr);
+	 PreparedStatement stat2=conn.prepareStatement(customerStr);
+	 PreparedStatement delEv=conn.prepareStatement(delEvStr)){
+	//update order
 	stat1.setDate(1, new java.sql.Date(order.getRecDate().getTime())); //TODO check for null pointer exception
 	stat1.setString(2, order.descriptionToString());
 	stat1.setFloat(3, order.getTotalPrice());
@@ -807,17 +808,66 @@ try (PreparedStatement stat1=this.connection.prepareStatement(orderStr);
 	stat1.setFloat(7, order.getExecTime());
 	stat1.setString(8, order.getStatus().toString());
 	stat1.setDate(9, new java.sql.Date (order.getFitDay().getTime()));
-	
+	stat1.setDate(10, new java.sql.Date (order.getIssueDate().getTime()));
+	stat1.setInt(11, order.getOrderNumber());
+	stat1.executeUpdate();
+	//update customer
+	stat2.setString(1, order.getCustomer().getFirstName());
+	stat2.setString(2, order.getCustomer().getLastName());
+	stat2.setString(3, order.getCustomer().getCellphone());
+	stat2.setString(4, order.getCustomer().getHomePhone());
+	stat2.setInt(5, order.getCustomer().getId());
+	stat2.executeUpdate();
+	//delete previous events
+	delEv.setInt(1, order.getOrderNumber());
+	//insert new events
+	for(Event e:order.getEvents())
+    addEvent(e);
+    }
+catch (SQLException e) {
+log.severe(e.getMessage());
+e.printStackTrace();
+return 0;
+}
+return order.getOrderNumber();
+}
+
+/**update order and customer 
+ * @return id of updated order or 0 if failed**/
+public int updateOrderwithoutEvents(Order order) {
+	String orderStr = "UPDATE Orders SET  rec_date=?, description=?, total_price=?, estimated_comp_day=?, try_on=?, paid=?, exec_time=?,"
+            + "status=?, fit_day=?, issue_date=? WHERE id = ?";
+String customerStr="UPDATE Customers SET first_name=?, last_name=?, cellphone=?, home_phone=? WHERE id=?";
+Connection conn=this.connect();
+try (PreparedStatement stat1=conn.prepareStatement(orderStr);
+PreparedStatement stat2=conn.prepareStatement(customerStr)){
+//update order
+stat1.setDate(1, new java.sql.Date(order.getRecDate().getTime())); //TODO check for null pointer exception
+stat1.setString(2, order.descriptionToString());
+stat1.setFloat(3, order.getTotalPrice());
+stat1.setDate(4, new java.sql.Date(order.getEstimatedCompTime().getTime()));
+stat1.setInt(5, order.getTryOn());
+stat1.setFloat(6, order.getPaid());
+stat1.setFloat(7, order.getExecTime());
+stat1.setString(8, order.getStatus().toString());
+stat1.setDate(9, new java.sql.Date (order.getFitDay().getTime()));
+stat1.setDate(10, new java.sql.Date (order.getIssueDate().getTime()));
+stat1.setInt(11, order.getOrderNumber());
+stat1.executeUpdate();
+//update customer
+stat2.setString(1, order.getCustomer().getFirstName());
+stat2.setString(2, order.getCustomer().getLastName());
+stat2.setString(3, order.getCustomer().getCellphone());
+stat2.setString(4, order.getCustomer().getHomePhone());
+stat2.setInt(5, order.getCustomer().getId());
+stat2.executeUpdate();
 }
 catch (SQLException e) {
 log.severe(e.getMessage());
 e.printStackTrace();
+return 0;
 }
-}
-
-public void updateOrderwithoutEvents(Order order) {
-	// TODO Auto-generated method stub
-	
+return order.getOrderNumber();
 }
 }
 

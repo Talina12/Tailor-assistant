@@ -5,6 +5,7 @@ import java.util.Date;
 
 import Gella.Tailor_assistant.model.Event;
 import Gella.Tailor_assistant.model.FreeTime;
+import Gella.Tailor_assistant.model.Order;
 import Gella.Tailor_assistant.model.Settings;
 
 /**
@@ -146,5 +147,22 @@ public Event[] setEvents( double duration, ) {
 	}
 	return  dates.toArray(new Date[dates.size()]);	
 }*/
+
+
+
+ /**
+  * frees up the time reserved for the order, goes through the list of free times from the beginning and returns the date
+  *  with free time of suitable duration or several dates with 
+  *  shorter duration which in total give the desired duration
+  *  if there is no suitable date, the method adds a new day to the list of free times
+  *   until  can find the time
+  * @see   CalendarController#addTime()
+  * @param duration
+  * @return Date[]
+  */
+public ArrayList<Event> getFreeDates(long duration, Order order) {
+	// TODO Auto-generated method stub
+	return null;
+}
 }	    
 
