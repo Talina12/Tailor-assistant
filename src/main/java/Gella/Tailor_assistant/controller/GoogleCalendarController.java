@@ -42,6 +42,7 @@ import com.google.api.services.calendar.model.FreeBusyRequestItem;
 import com.google.api.services.calendar.model.FreeBusyResponse;
 import com.google.api.services.calendar.model.TimePeriod;
 
+import Gella.Tailor_assistant.model.Order;
 import Gella.Tailor_assistant.model.Settings;
 
 //TODO check all possible exceptions and display messages for user
@@ -300,4 +301,17 @@ public void synchronizeLocalToGoogle() {
 	}
 	return null;
   }
+
+public void setFree(Order order) {
+	
+	ArrayList<Gella.Tailor_assistant.model.Event> events= dbHandler.getEventsByOrderId(order.getOrderNumber());
+	for(Gella.Tailor_assistant.model.Event ev:events) {
+		com.google.api.services.calendar.model.Event gev = client.events().get(workingCalendar.getId(),ev.getGoogleId()).execute();
+	}
+}
+
+public void setBusy(Order order) {
+	// TODO Auto-generated method stub
+	
+}
 }

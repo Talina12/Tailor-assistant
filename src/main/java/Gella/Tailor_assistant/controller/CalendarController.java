@@ -161,8 +161,20 @@ public Event[] setEvents( double duration, ) {
   * @return Date[]
   */
 public ArrayList<Event> getFreeDates(long duration, Order order) {
-	// TODO Auto-generated method stub
-	return null;
+	ArrayList<Event> dates = new ArrayList<Event>();
+	long sum =duration; 
+	int i=0;
+	googleCalendarController.setFree(order);
+	setFreeTimes();
+	while (sum>0) {
+	 if (i>freeTimes.size()-1) addTime();
+	 sum=sum-freeTimes.get(i).getDuration();
+	 if (sum<0) dates.add(new Event(freeTimes.get(i).getStart(),freeTimes.get(i).getDuration()+sum));
+	 else dates.add(new Event(freeTimes.get(i).getStart(),freeTimes.get(i).getDuration()));
+	 i++;
+	}
+	googleCalendarController.setBusy(order);
+	return  dates;
 }
 }	    
 
