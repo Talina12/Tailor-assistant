@@ -16,6 +16,7 @@ public class testwindow {
 
 	private JFrame frame;
 	private JTextField textField;
+	private JTextField textField1;
 
 	/**
 	 * Launch the application.
@@ -79,7 +80,13 @@ public class testwindow {
 					fb.insertString( offset, string, attr );
 					}
 					} );
-		frame.getContentPane().add(textField);
-		textField.setColumns(10);
+		//frame.getContentPane().add(textField);
+		textField1 = new JTextField();
+		textField1.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		textField1.setBounds(106, 79, 128, 33);
+		textField1.setColumns(10);
+		frame.getContentPane().add(textField1);
+		String s=textField1.getText();
+		System.out.println(s.length());
 	}
 }

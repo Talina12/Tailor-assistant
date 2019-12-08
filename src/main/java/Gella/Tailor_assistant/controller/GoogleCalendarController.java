@@ -302,16 +302,51 @@ public void synchronizeLocalToGoogle() {
 	return null;
   }
 
-public void setFree(Order order) {
-	
+/**sets all events of the order to free
+ * @return number of updated events
+ * **/
+ public int setFree(Order order) {
 	ArrayList<Gella.Tailor_assistant.model.Event> events= dbHandler.getEventsByOrderId(order.getOrderNumber());
+	int i=0;
 	for(Gella.Tailor_assistant.model.Event ev:events) {
-		com.google.api.services.calendar.model.Event gev = client.events().get(workingCalendar.getId(),ev.getGoogleId()).execute();
+		try {
+			// Retrieve the event from the API
+			com.google.api.services.calendar.model.Event gev = client.events().get(workingCalendar.getId(),ev.getGoogleId()).execute();
+			// Make a change
+			gev.setTransparency("transparent");
+			// Update the event
+			client.events().update(workingCalendar.getId(), gev.getId(), gev).execute();
+			
+		} catch (IOException e) {
+			JOptionPane.showMessageDialog(null,e.getClass().toString()+"   unable to update event");
+			log.severe(e.getMessage() +"  "+e.getClass().toString());
+		}
 	}
+	i++;
+	return i;
 }
 
-public void setBusy(Order order) {
-	// TODO Auto-generated method stub
-	
+ /**sets all events of the order to free
+  * @return number of updated events
+  * **/
+public int setBusy(Order order) {
+	ArrayList<Gella.Tailor_assistant.model.Event> events= dbHandler.getEventsByOrderId(order.getOrderNumber());
+	int i=0;
+	for(Gella.Tailor_assistant.model.Event ev:events) {
+		try {
+			// Retrieve the event from the API
+			com.google.api.services.calendar.model.Event gev = client.events().get(workingCalendar.getId(),ev.getGoogleId()).execute();
+			// Make a change
+			gev.setTransparency("opaque");
+			// Update the event
+			client.events().update(workingCalendar.getId(), gev.getId(), gev).execute();
+			
+		} catch (IOException e) {
+			JOptionPane.showMessageDialog(null,e.getClass().toString()+"   unable to update event");
+			log.severe(e.getMessage() +"  "+e.getClass().toString());
+		}
+	}
+	i++;
+	return i;
 }
 }

@@ -12,6 +12,7 @@ import java.awt.Font;
 import java.awt.Point;
 import java.awt.Rectangle;
 
+import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JButton;
@@ -126,16 +127,22 @@ public class MainWindow2 {
 			@Override
 			public void replace(FilterBypass fb, int offset, int length, String string,AttributeSet attr) throws BadLocationException
 			{
-			  if (!Character.isDigit(string.charAt(0)))
+			 if (string==null) fb.remove(0,length);
+			 else
+			 {
+				if (!Character.isDigit(string.charAt(0)))
 					Toolkit.getDefaultToolkit().beep();
 			  else
 				fb.insertString( offset, string, attr );
+			 }
 					}
-					} );
+			} );
 		orderNumField.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				setResultContainer(dbHandler.getOrderById(Integer.parseInt(orderNumField.getText())));	}
+				setResultContainer(dbHandler.getOrderById(Integer.parseInt(orderNumField.getText())));
+				orderNumField.setText(null);
+				}
         });
 		
 		frame.add(orderNumLabel);
@@ -144,12 +151,12 @@ public class MainWindow2 {
 		orderNumField.setVisible(false);
 		 
 		resultsContainer = new Box(BoxLayout.Y_AXIS);
-		resultConSize= new Dimension(frameSize.width/2,frameSize.height/3);
+		resultConSize= new Dimension(frameSize.width/2,Math.toIntExact((Math.round(frameSize.height/2.3))));
 		x=frameSize.width/2-resultConSize.width/2;
 		y=orderNumField.getBounds().y+fieldSize.height+frameSize.height/15;
 		resultsContainer.setBounds(x,y,resultConSize.width, resultConSize.height);
 		resultsContainer.setBorder(border);
-		resultsContainer.setBackground(new Color(0,0,0,0));
+		resultsContainer.setBackground(new Color(10,20,30,40));
 		frame.add(resultsContainer);
 		resultsContainer.setVisible(false);
 		}
@@ -184,6 +191,7 @@ public class MainWindow2 {
 		       +"</div>"
 			+ "</body>";
 	 JButton orderBut= new JButton(html);
+	 Log.info(orderBut.getText());
 	 orderBut.setFont(new Font("Tahoma", Font.PLAIN, fontSize));
 	 orderBut.setMinimumSize(new Dimension(600,300 ));
 	 orderBut.setMaximumSize(new Dimension(screenSize.width/2,screenSize.height/4 ));
@@ -193,12 +201,18 @@ public class MainWindow2 {
 		public void actionPerformed(ActionEvent e) {
 			UpdateOrderWindow updateOrderWindow = new UpdateOrderWindow(order);
 			updateOrderWindow.setVisible(true);
-		}
+			resultsContainer.removeAll();
+			resultsContainer.setVisible(false);
+			orderNumLabel.setVisible(false);
+			orderNumField.setVisible(false);
+			}
 	});
 	 // orderBut.setText(order.title());
 	 resultsContainer.add(orderBut);
+	 Log.info(String.valueOf(resultsContainer.getComponentCount()));
 	 resultsContainer.setVisible(true);
+	 
 	}
 	
-	
+	 
 }

@@ -799,16 +799,24 @@ try (PreparedStatement stat1=conn.prepareStatement(orderStr);
 	 PreparedStatement stat2=conn.prepareStatement(customerStr);
 	 PreparedStatement delEv=conn.prepareStatement(delEvStr)){
 	//update order
-	stat1.setDate(1, new java.sql.Date(order.getRecDate().getTime())); //TODO check for null pointer exception
+	if(order.getRecDate()!=null)
+	 stat1.setDate(1, new java.sql.Date(order.getRecDate().getTime()));
+	else stat1.setDate(1, null);
 	stat1.setString(2, order.descriptionToString());
 	stat1.setFloat(3, order.getTotalPrice());
-	stat1.setDate(4, new java.sql.Date(order.getEstimatedCompTime().getTime()));
+	if (order.getEstimatedCompTime()!=null)
+	 stat1.setDate(4, new java.sql.Date(order.getEstimatedCompTime().getTime()));
+	else stat1.setDate(4, null);
 	stat1.setInt(5, order.getTryOn());
 	stat1.setFloat(6, order.getPaid());
 	stat1.setFloat(7, order.getExecTime());
 	stat1.setString(8, order.getStatus().toString());
+	if (order.getFitDay()!=null)
 	stat1.setDate(9, new java.sql.Date (order.getFitDay().getTime()));
-	stat1.setDate(10, new java.sql.Date (order.getIssueDate().getTime()));
+	else stat1.setDate(9, null);
+	if (order.getIssueDate()!=null)
+	 stat1.setDate(10, new java.sql.Date (order.getIssueDate().getTime()));
+	else stat1.setDate(10, null);
 	stat1.setInt(11, order.getOrderNumber());
 	stat1.executeUpdate();
 	//update customer
@@ -842,16 +850,24 @@ Connection conn=this.connect();
 try (PreparedStatement stat1=conn.prepareStatement(orderStr);
 PreparedStatement stat2=conn.prepareStatement(customerStr)){
 //update order
-stat1.setDate(1, new java.sql.Date(order.getRecDate().getTime())); //TODO check for null pointer exception
+if (order.getRecDate()!=null)	
+ stat1.setDate(1, new java.sql.Date(order.getRecDate().getTime()));
+else stat1.setDate(1, null);
 stat1.setString(2, order.descriptionToString());
 stat1.setFloat(3, order.getTotalPrice());
-stat1.setDate(4, new java.sql.Date(order.getEstimatedCompTime().getTime()));
+if (order.getEstimatedCompTime()!=null)
+ stat1.setDate(4, new java.sql.Date(order.getEstimatedCompTime().getTime()));
+else stat1.setDate(4, null);
 stat1.setInt(5, order.getTryOn());
 stat1.setFloat(6, order.getPaid());
 stat1.setFloat(7, order.getExecTime());
 stat1.setString(8, order.getStatus().toString());
-stat1.setDate(9, new java.sql.Date (order.getFitDay().getTime()));
-stat1.setDate(10, new java.sql.Date (order.getIssueDate().getTime()));
+if (order.getFitDay()!=null)
+ stat1.setDate(9, new java.sql.Date (order.getFitDay().getTime()));
+else stat1.setDate(9, null);
+if (order.getIssueDate()!=null)
+ stat1.setDate(10, new java.sql.Date (order.getIssueDate().getTime()));
+else stat1.setDate(10, null);
 stat1.setInt(11, order.getOrderNumber());
 stat1.executeUpdate();
 //update customer

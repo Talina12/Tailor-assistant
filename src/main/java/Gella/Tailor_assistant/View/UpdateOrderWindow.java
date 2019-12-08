@@ -237,6 +237,7 @@ public class UpdateOrderWindow extends JFrame {
 	    statusComboBox = new JComboBox<String>(OrderStatus.titles()); 
 		statusComboBox.setBounds(603, 134, 142, 22);
 		statusComboBox.setEditable(false);
+		statusComboBox.getModel().setSelectedItem(upOrder.getStatus().getTitle());
 		contentPane.add(statusComboBox);
 		
 		
@@ -355,7 +356,10 @@ public class UpdateOrderWindow extends JFrame {
 		}
 		estimatedCompDateField.setBounds(228, 386, 86, 22);
 		estimatedCompDateField.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		estimatedCompDateField.setValue(upOrder.getEvents().get((upOrder.getEvents().size()-1)).getEnd());
+		estimatedCompDateField.setValue(upOrder.getEstimatedCompTime());
+		if (upOrder.getEstimatedCompTime()==null)
+			if (upOrder.getEvents().size()>0)
+		     estimatedCompDateField.setValue(upOrder.getEvents().get((upOrder.getEvents().size()-1)).getEnd());
 		contentPane.add(estimatedCompDateField);
 		estimatedCompDateField.setColumns(10);
 		
@@ -369,7 +373,10 @@ public class UpdateOrderWindow extends JFrame {
 		}
 		estimatedCompTimeField.setBounds(318, 386, 86, 22);
 		estimatedCompTimeField.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		estimatedCompTimeField.setValue(upOrder.getEvents().get((upOrder.getEvents().size()-1)).getEnd());
+		estimatedCompTimeField.setValue(upOrder.getEstimatedCompTime());
+		if(upOrder.getEstimatedCompTime()==null)
+			if (upOrder.getEvents().size()>0)
+		     estimatedCompTimeField.setValue(upOrder.getEvents().get((upOrder.getEvents().size()-1)).getEnd());
 		contentPane.add(estimatedCompTimeField);
 		estimatedCompTimeField.setColumns(10);
 		
