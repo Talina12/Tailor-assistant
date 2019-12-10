@@ -20,6 +20,7 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.border.Border;
 import javax.swing.event.CaretEvent;
@@ -42,12 +43,13 @@ import javax.swing.BoxLayout;
 public class MainWindow2 {
 
 	private JFrame frame;
-	private Box resultsContainer;
+	private JScrollPane resultsContainer;
     private JButton newOrderButton;
 	private JButton updateOrderButton;
 	private JLabel orderNumLabel;
 	private JTextField orderNumField;
 	private HintWindow hintWindow;
+	//private JScrollPane resultsScrollPane;
 	DbHandler dbHandler;
 	Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 	Border border;
@@ -140,6 +142,7 @@ public class MainWindow2 {
 		orderNumField.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				resultsContainer.setVisible(false);
 				setResultContainer(dbHandler.getOrderById(Integer.parseInt(orderNumField.getText())));
 				orderNumField.setText(null);
 				}
@@ -150,13 +153,15 @@ public class MainWindow2 {
 		orderNumLabel.setVisible(false);
 		orderNumField.setVisible(false);
 		 
-		resultsContainer = new Box(BoxLayout.Y_AXIS);
+		resultsContainer = new JScrollPane();
+		//resultsContainer = new Box(BoxLayout.Y_AXIS);
 		resultConSize= new Dimension(frameSize.width/2,Math.toIntExact((Math.round(frameSize.height/2.3))));
 		x=frameSize.width/2-resultConSize.width/2;
 		y=orderNumField.getBounds().y+fieldSize.height+frameSize.height/15;
 		resultsContainer.setBounds(x,y,resultConSize.width, resultConSize.height);
 		resultsContainer.setBorder(border);
 		resultsContainer.setBackground(new Color(10,20,30,40));
+		//resultsScrollPane = new JScrollPane(resultsContainer);
 		frame.add(resultsContainer);
 		resultsContainer.setVisible(false);
 		}
@@ -193,7 +198,7 @@ public class MainWindow2 {
 	 JButton orderBut= new JButton(html);
 	 Log.info(orderBut.getText());
 	 orderBut.setFont(new Font("Tahoma", Font.PLAIN, fontSize));
-	 orderBut.setMinimumSize(new Dimension(600,300 ));
+	 orderBut.setMinimumSize(new Dimension(screenSize.width/2,screenSize.height/4 ));
 	 orderBut.setMaximumSize(new Dimension(screenSize.width/2,screenSize.height/4 ));
 	 orderBut.setPreferredSize(new Dimension(screenSize.width/2,screenSize.height/4 ));
 	 orderBut.addActionListener(new ActionListener() {
