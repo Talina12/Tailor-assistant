@@ -828,9 +828,11 @@ try (PreparedStatement stat1=conn.prepareStatement(orderStr);
 	stat2.executeUpdate();
 	//delete previous events
 	delEv.setInt(1, order.getOrderNumber());
+	delEv.executeUpdate();
 	//insert new events
-	for(Event e:order.getEvents())
-    addEvent(e);
+	if (order.getEvents()!=null&&order.getEvents().size()>0)
+	 for(Event e:order.getEvents())
+      addEvent(e);
     }
 catch (SQLException e) {
 log.severe(e.getMessage());

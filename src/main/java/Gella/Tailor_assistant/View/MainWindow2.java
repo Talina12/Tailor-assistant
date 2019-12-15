@@ -6,6 +6,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
+import java.util.logging.Logger;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -43,20 +44,21 @@ import javax.swing.BoxLayout;
 public class MainWindow2 {
 
 	private JFrame frame;
-	private JScrollPane resultsContainer;
+	private Box resultsContainer;
     private JButton newOrderButton;
 	private JButton updateOrderButton;
 	private JLabel orderNumLabel;
 	private JTextField orderNumField;
 	private HintWindow hintWindow;
-	//private JScrollPane resultsScrollPane;
-	DbHandler dbHandler;
-	Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-	Border border;
-	Fon fon;
-	int fontSize;
+	private JScrollPane resultsScrollPane;
+	private DbHandler dbHandler;
+	private Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+	private Border border;
+	private Fon fon;
+	private int fontSize;
 	private Dimension buttonSize,fieldSize,frameSize,resultConSize;
 	private int frameBorder=20;
+	public static Logger log = Logger.getLogger("View.MainWindow2");
 	
 	public MainWindow2() {
 		initialize();
@@ -98,8 +100,9 @@ public class MainWindow2 {
 		updateOrderButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				orderNumLabel.setVisible(true);
-				orderNumField.setVisible(true);
+			 orderNumLabel.setVisible(true);
+			 orderNumField.setText(null);
+			 orderNumField.setVisible(true);
 			 orderNumField.requestFocus();
 			}
 		});
@@ -112,6 +115,7 @@ public class MainWindow2 {
 		x=frameSize.width/2-5-fieldSize.width;
 		y=updateOrderButton.getBounds().y+buttonSize.height+frame.getBounds().height/15;
 		orderNumLabel.setBounds(x,y,fieldSize.width,fieldSize.height);
+		
 		orderNumField = new JTextField();
 		orderNumField.setFont(new Font("Tahoma", Font.PLAIN, fontSize));
 		x=frameSize.width/2+5;
@@ -142,9 +146,10 @@ public class MainWindow2 {
 		orderNumField.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				resultsContainer.setVisible(false);
+				resultsScrollPane.setVisible(false);
 				setResultContainer(dbHandler.getOrderById(Integer.parseInt(orderNumField.getText())));
-				orderNumField.setText(null);
+				resultsScrollPane.setVisible(true);
+			    orderNumField.setText(null);
 				}
         });
 		
@@ -153,17 +158,17 @@ public class MainWindow2 {
 		orderNumLabel.setVisible(false);
 		orderNumField.setVisible(false);
 		 
-		resultsContainer = new JScrollPane();
-		//resultsContainer = new Box(BoxLayout.Y_AXIS);
+		resultsContainer = new Box(BoxLayout.Y_AXIS);
 		resultConSize= new Dimension(frameSize.width/2,Math.toIntExact((Math.round(frameSize.height/2.3))));
 		x=frameSize.width/2-resultConSize.width/2;
 		y=orderNumField.getBounds().y+fieldSize.height+frameSize.height/15;
 		resultsContainer.setBounds(x,y,resultConSize.width, resultConSize.height);
 		resultsContainer.setBorder(border);
 		resultsContainer.setBackground(new Color(10,20,30,40));
-		//resultsScrollPane = new JScrollPane(resultsContainer);
-		frame.add(resultsContainer);
-		resultsContainer.setVisible(false);
+		resultsScrollPane = new JScrollPane(resultsContainer);
+		resultsScrollPane.setBounds(x,y,resultConSize.width, resultConSize.height);
+		frame.add(resultsScrollPane);
+		resultsScrollPane.setVisible(false);
 		}
 
 	public JFrame getFrame() {
@@ -173,6 +178,9 @@ public class MainWindow2 {
 	private void setResultContainer(final Order order) {
 	    String htmlDes="<ul>";
 	    ArrayList<DescriptionRow> des=order.getDescription();
+	    log.info(des.toString());
+	    for (DescriptionRow d:des)
+	    	log.info(d.getItem()+"  "+d.getPrice());
 	    for (DescriptionRow d:des) 
 	    	htmlDes=htmlDes.concat("<li>"+d.getItem()+"  "+d.getPrice()+"</li>"); 
 	    htmlDes=htmlDes.concat("</ul>");
@@ -196,7 +204,6 @@ public class MainWindow2 {
 		       +"</div>"
 			+ "</body>";
 	 JButton orderBut= new JButton(html);
-	 Log.info(orderBut.getText());
 	 orderBut.setFont(new Font("Tahoma", Font.PLAIN, fontSize));
 	 orderBut.setMinimumSize(new Dimension(screenSize.width/2,screenSize.height/4 ));
 	 orderBut.setMaximumSize(new Dimension(screenSize.width/2,screenSize.height/4 ));
@@ -207,17 +214,14 @@ public class MainWindow2 {
 			UpdateOrderWindow updateOrderWindow = new UpdateOrderWindow(order);
 			updateOrderWindow.setVisible(true);
 			resultsContainer.removeAll();
-			resultsContainer.setVisible(false);
+			resultsScrollPane.setVisible(false);
 			orderNumLabel.setVisible(false);
 			orderNumField.setVisible(false);
 			}
 	});
-	 // orderBut.setText(order.title());
 	 resultsContainer.add(orderBut);
-	 Log.info(String.valueOf(resultsContainer.getComponentCount()));
-	 resultsContainer.setVisible(true);
-	 
-	}
+	 log.info(String.valueOf(resultsContainer.getComponentCount()));
+	 }
 	
 	 
 }

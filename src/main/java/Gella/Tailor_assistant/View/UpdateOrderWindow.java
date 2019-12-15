@@ -461,13 +461,21 @@ public class UpdateOrderWindow extends JFrame {
 			public void actionPerformed(ActionEvent arg0) {
 			 setOrder(order);
 			 if(rescheduled) {	
+				 ArrayList<Event> events;
 				 int id= dbHandler.updateOrder(order);
-				 if(id>0)
-				 for (Event ev: dbHandler.getEventsByOrderId(id))
+				 if(id>0) {
+					  events = dbHandler.getEventsByOrderId(id); 
+				 if (events!=null && events.size()>0)
+				  for (Event ev: events)
 				   googleCalendarController.addEvent(ev);	
+				 }
+				 else JOptionPane.showMessageDialog(null," failed to update order");
+		    	   
 			 }
 			 else dbHandler.updateOrderwithoutEvents(order);
-				 dispose();
+			 googleCalendarController.synchronizeGoogleToLocal();
+			 googleCalendarController.synchronizeLocalToGoogle();
+			 dispose();
 				
 			}});
 		
@@ -553,13 +561,19 @@ private ActionListener tableCellActionListener = new ActionListener() {
 	 newOrder.setPaid(Float.parseFloat(paidField.getText()));
 	 newOrder.setExecTime(Float.parseFloat(execTimeField.getText()));
 	 newOrder.setStatus(OrderStatus.valueOfTitle((String)statusComboBox.getSelectedItem()));
+	 // if the order is ready we must delete all events of the order
+	 if(newOrder.getStatus()==OrderStatus.READY||newOrder.getStatus()==OrderStatus.CLOSED) 
+	 {dates=null;
+	  newOrder.setEvents(null);
+	  rescheduled=true;
+	 }
 	 if (fitDayField.getValue()!=null) 
 		 newOrder.setFitDay((Date) fitDayField.getValue());
 	 else newOrder.setFitDay(null);
 	 if (issueDateField.getValue()!=null)
 		 newOrder.setIssueDate((Date) issueDateField.getValue());
 	 else newOrder.setIssueDate(null);
-	 if(rescheduled) {
+	 if(rescheduled && newOrder.getStatus()!=OrderStatus.READY && newOrder.getStatus()!=OrderStatus.CLOSED) {
 	 for(Event i:dates ) {
 	   i.setName(newOrder.getCustomer().toString()+ " "+ newOrder.getTotalPrice());
 	   i.setOrderId(newOrder.getOrderNumber());
