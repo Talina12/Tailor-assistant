@@ -49,7 +49,6 @@ public class MainWindow {
 		newOrderButton.addActionListener(new ActionListener() {
 		    @Override
 			public void actionPerformed(ActionEvent e) {
-		    	dbHandler.resetInfo();
 		    	NewOrderWindow newOrderWindow= new NewOrderWindow();
 		    	newOrderWindow.setVisible(true);
 			 }
@@ -107,7 +106,6 @@ public class MainWindow {
 		testButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-			test.setText(dbHandler.getInfo());
 			}
 		});
 		fon.add(testButton);

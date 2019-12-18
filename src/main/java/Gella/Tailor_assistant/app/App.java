@@ -1,18 +1,8 @@
 package Gella.Tailor_assistant.app;
 
 import java.awt.EventQueue;
-//import java.sql.SQLException;
-//import javax.swing.JFrame;
-//import org.sqlite.SQLiteException;
-//import org.sqlite.*;
-import java.sql.SQLException;
-
 import Gella.Tailor_assistant.View.*;
 import Gella.Tailor_assistant.controller.GoogleCalendarController;
-//import controller.DbHandler;
-//import model.Order;
-//import model.Settings;
-
 
 public class App {
   public static void main(String[] args) {
@@ -21,7 +11,7 @@ public class App {
 			 GoogleCalendarController googleCalendarController=GoogleCalendarController.getInstance();	
 				googleCalendarController.synchronizeGoogleToLocal();
 				googleCalendarController.synchronizeLocalToGoogle();
-				    MainWindow window = new MainWindow();
+				    MainWindow2 window = new MainWindow2();
 					window.getFrame().setVisible(true);
 					}
 				

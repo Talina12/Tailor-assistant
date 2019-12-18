@@ -148,7 +148,7 @@ public class DbHandler {
     		   {//info=info+"Customer not exist"+ '\n';
     		    custId=addNewCustomer(cust); //TODO handle exceptions if cust don't added
     		    }
-    	   else //info=info+"Customer already exists"+'\n';
+    	 //  else //info=info+"Customer already exists"+'\n';
     	   statement.setInt(1, custId);
            java.sql.Date rd = new java.sql.Date(order.getRecDate().getTime());
            statement.setDate(2,  rd);
