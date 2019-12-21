@@ -34,6 +34,8 @@ import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.Calendar;
 import com.google.api.services.calendar.model.CalendarList;
 import com.google.api.services.calendar.model.CalendarListEntry;
+import com.google.api.services.calendar.model.ColorDefinition;
+import com.google.api.services.calendar.model.Colors;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
 import com.google.api.services.calendar.model.FreeBusyCalendar;
@@ -143,31 +145,70 @@ public class GoogleCalendarController {
    return result;
  }
 	  
-  public void synchronizeGoogleToLocal() {
+  public void synchronize() {
 	try {
-	List<com.google.api.services.calendar.model.Event> googleEvents = client.events().list(workingCalendar.getId()).execute().getItems();
-	if (googleEvents!=null) {
-	 for (com.google.api.services.calendar.model.Event ge:googleEvents) {
-	   ArrayList<Gella.Tailor_assistant.model.Event> localEvents  = dbHandler.getEventsByGoogleId(ge.getId());
-	   if (localEvents!=null) {
-		if (localEvents.size()>1) {/*TODO sync error handling*/};
-	    if (localEvents.size()==0) client.events().delete(workingCalendar.getId(),ge.getId()).execute();
-		else dbHandler.updateEvent(setLocalEvent(localEvents.get(0),ge));
-		}
-	  }
-	}
-	}catch (IOException e){
+	//request all events from the working calendar
+		List<com.google.api.services.calendar.model.Event> googleEvents = client.events().list(workingCalendar.getId()).execute().getItems();
+	//request a list of all events from the database	
+		ArrayList<Gella.Tailor_assistant.model.Event> localEvents=dbHandler.getEvents();
+		Boolean[] ifPlanned = new Boolean[localEvents.size()];
+		for (int i=0;i<ifPlanned.length;i++)
+			ifPlanned[i]=false;
+	//if the list is not empty
+	    if (googleEvents!=null) {
+	    //	for each item in the list:
+	     for (com.google.api.services.calendar.model.Event ge:googleEvents) {
+	     Boolean b=false;
+	      // check if there is a corresponding event in the database
+	      for(int i=0;i<localEvents.size();i++)
+	    	  if (localEvents.get(i).getGoogleId().equals(ge.getId())) {
+	    		  //mark that this event in the database has a corresponding event in google calendar
+	    		  ifPlanned[i]=true;
+	              //set the data of event in the database to the data of event in google calendar
+	    		  dbHandler.updateEvent(setLocalEvent(localEvents.get(i),ge));
+	    		  //mark that corresponding event in the database is found
+	              b=true;
+	              String color="";
+	              Order order=dbHandler.getOrderById(localEvents.get(i).getOrderId());
+	              if (order.getIssueDate()!=null) {
+	              long gap=order.getIssueDate().getTime()-ge.getEnd().getDateTime().getValue();
+	              if (gap>518400000) color="3"; 
+	            	else 
+	            		if (gap>432000000) color="10";
+	            		else
+	            			if (gap>345600000) color="1";
+	            			else
+	            				if (gap>259200000) color="7";
+	            				else 
+	            					if (gap>172800000)color="5";
+	            					else
+	            						if (gap>86400000) color="5";
+	            						else
+	            							if (gap<0)  color ="11";
+	            							else color="4";
+	              }
+	              else color="3";
+	              if ((ge.getColorId()==null)||(!ge.getColorId().equals(color))) {
+	                  ge.setColorId(color);
+	            	  client.events().update(workingCalendar.getId(), ge.getId(), ge).execute();
+	                }
+	    	  };
+	     if (!b) client.events().delete(workingCalendar.getId(),ge.getId()).execute();
+		 }
+	    }
+	    //go through all the events from the database that do not have a corresponding event in google calendar
+	    //and add the events to google calendar
+	    for(int i=0;i<ifPlanned.length;i++)  
+	    	if (!(ifPlanned[i]))
+	    		addEvent(localEvents.get(i));
+	} catch (IOException e){
 		log.severe(e.getMessage()+"  "+e.getClass().toString());
 	}
- }
+}
   
  private Gella.Tailor_assistant.model.Event setLocalEvent
       (Gella.Tailor_assistant.model.Event locEv,com.google.api.services.calendar.model.Event ge) {
-   //if (locEv==null)log.info("locEv=null");
-   //if (ge==null)log.info("ge=null");
-	// if (ge.getStart()==null) log.info("ge.getStart()=null");
-	 //log.info(ge.getSummary());
-	 log.info("setLocalEvent");
+   log.info("setLocalEvent");
    locEv.setStart(new Date(ge.getStart().getDateTime().getValue()));
    long duration =ge.getEnd().getDateTime().getValue()-ge.getStart().getDateTime().getValue();
    locEv.setDuration(duration);
@@ -177,7 +218,8 @@ public class GoogleCalendarController {
    return locEv;
 }
 
-public void synchronizeLocalToGoogle() {
+/*
+ public void synchronizeLocalToGoogle() {
 	  ArrayList<Gella.Tailor_assistant.model.Event> localEvents  = dbHandler.getEvents();
 	  for(Gella.Tailor_assistant.model.Event lev:localEvents) {
 		  com.google.api.services.calendar.model.Event ge;  
@@ -197,7 +239,7 @@ public void synchronizeLocalToGoogle() {
 		}
 	  }
   }
-  
+  */
   public void test(Gella.Tailor_assistant.model.Event ev) {
 	  try {
 			if (ev.getGoogleId().length()>0) {  

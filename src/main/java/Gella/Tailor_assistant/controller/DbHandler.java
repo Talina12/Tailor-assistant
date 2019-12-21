@@ -179,6 +179,7 @@ public class DbHandler {
            };
            for(Event e:order.getEvents())
             {e.setOrderId(orderId);
+             e.setName(order.getCustomer().toString()+ " "+ order.getTotalPrice()+" номер заказа:"+orderId+ "готово до:"+order.getIssueDate());
              addEvent(e);
             }
            return orderId;

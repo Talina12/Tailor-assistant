@@ -1,5 +1,6 @@
 package Gella.Tailor_assistant.model;
 
+import java.awt.Color;
 import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.Date;
@@ -23,13 +24,14 @@ import java.util.GregorianCalendar;
  private static final java.io.File DATA_STORE_DIR =
 	      new java.io.File(System.getProperty("user.dir"), ".store/"+APPLICATION_NAME);
  private static final long minEvent=900000;
+ private static Color[] eventcolors;
  
  public static synchronized Settings getInstance() throws SQLException {
      if (instance == null)
          instance = new Settings();
      return instance;
 	}
- 
+  
  public Settings() {
 	 HOUR_RATING=100;
 	 weekShedule=new Date[7][2];

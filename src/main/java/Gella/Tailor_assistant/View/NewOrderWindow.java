@@ -119,7 +119,7 @@ public class NewOrderWindow extends JFrame{
 			log.severe("unable to connect to database");
 		}
 		calendarController= CalendarController.getInstance();
-		googleCalendarController.synchronizeGoogleToLocal();
+		googleCalendarController.synchronize();
 		newOrder= new Order();
 		setBounds(30, 50, 901, 640);
 		setTitle("New order");
@@ -610,7 +610,8 @@ public class NewOrderWindow extends JFrame{
 		 order.setIssueDate((Date) issueDateField.getValue());
 	 else order.setIssueDate(null);
 	 for(Event i:dates )
-	   i.setName(order.getCustomer().toString()+ " "+ order.getTotalPrice());
+	  i.setDescription(order.getDescription().toString());
+		 // i.setName(order.getCustomer().toString()+ " "+ order.getTotalPrice());
 	 order.setEvents(dates);
 	}
 	

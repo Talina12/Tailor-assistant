@@ -473,8 +473,7 @@ public class UpdateOrderWindow extends JFrame {
 		    	   
 			 }
 			 else dbHandler.updateOrderwithoutEvents(order);
-			 googleCalendarController.synchronizeGoogleToLocal();
-			 googleCalendarController.synchronizeLocalToGoogle();
+			 googleCalendarController.synchronize();
 			 dispose();
 				
 			}});

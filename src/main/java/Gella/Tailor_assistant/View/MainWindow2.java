@@ -35,6 +35,7 @@ import javax.swing.text.DocumentFilter.FilterBypass;
 import org.mortbay.log.Log;
 
 import Gella.Tailor_assistant.controller.DbHandler;
+import Gella.Tailor_assistant.controller.GoogleCalendarController;
 import Gella.Tailor_assistant.model.Customer;
 import Gella.Tailor_assistant.model.DescriptionRow;
 import Gella.Tailor_assistant.model.Order;
@@ -59,6 +60,8 @@ public class MainWindow2 {
 	private Dimension buttonSize,fieldSize,frameSize,resultConSize;
 	private int frameBorder=20;
 	public static Logger log = Logger.getLogger("View.MainWindow2");
+	JButton synchronizeButton;
+	GoogleCalendarController googleCalendarController;
 	
 	public MainWindow2() {
 		initialize();
@@ -78,11 +81,13 @@ public class MainWindow2 {
 		fontSize=screenSize.width/80;
 		border = BorderFactory.createEtchedBorder();
 		dbHandler=DbHandler.getInstance();
+		googleCalendarController=GoogleCalendarController.getInstance();	
 		hintWindow = new HintWindow();
 		
-		buttonSize= new Dimension(frame.getBounds().width/5,frame.getBounds().height/7);
-		newOrderButton = new JButton("New order");
-		int x=(frame.getBounds().width-buttonSize.width*2)/3;
+		buttonSize= new Dimension(frame.getBounds().width/6,frame.getBounds().height/7);
+		newOrderButton = new JButton("Новый заказ");
+		int space=(frame.getBounds().width-buttonSize.width*3)/4;
+		int x=space;
 		int y=frame.getBounds().height/9;
 		newOrderButton.setBounds(x,y,buttonSize.width,buttonSize.height);
 		newOrderButton.setFont(new Font("Tahoma", Font.PLAIN, fontSize));
@@ -93,8 +98,8 @@ public class MainWindow2 {
 		    	newOrderWindow.setVisible(true);
 			 }
 		});
-		updateOrderButton = new JButton("Update order");
-		x=x+buttonSize.width+x;
+		updateOrderButton = new JButton("обновить заказ");
+		x=x+buttonSize.width+space;
 		updateOrderButton.setBounds(x, y, buttonSize.width, buttonSize.height);
 		updateOrderButton.setFont(new Font("Tahoma", Font.PLAIN, fontSize));
 		updateOrderButton.addActionListener(new ActionListener() {
@@ -108,6 +113,19 @@ public class MainWindow2 {
 		});
 		frame.add(newOrderButton);
 		frame.add(updateOrderButton);
+		
+		synchronizeButton = new JButton("Синронизация");
+		x=x+buttonSize.width+space;
+		synchronizeButton.setBounds(x, y, buttonSize.width, buttonSize.height);
+		//synchronizeButton.setBounds(x, y, buttonSize.width, buttonSize.height);
+		synchronizeButton.setFont(new Font("Tahoma", Font.PLAIN, fontSize));
+		synchronizeButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				googleCalendarController.synchronize();
+			}
+		});
+		frame.add(synchronizeButton);
 		
 		fieldSize= new Dimension(frame.getBounds().width/9,frame.getBounds().height/15);
 		orderNumLabel = new JLabel("Order Number");
