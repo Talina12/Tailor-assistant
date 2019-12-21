@@ -24,7 +24,6 @@ import java.util.GregorianCalendar;
  private static final java.io.File DATA_STORE_DIR =
 	      new java.io.File(System.getProperty("user.dir"), ".store/"+APPLICATION_NAME);
  private static final long minEvent=900000;
- private static Color[] eventcolors;
  
  public static synchronized Settings getInstance() throws SQLException {
      if (instance == null)
@@ -38,51 +37,51 @@ import java.util.GregorianCalendar;
 	 
 	 Calendar calendar = new GregorianCalendar();
 	 calendar.set(Calendar.DAY_OF_WEEK, 1);
-	 calendar.set(Calendar.HOUR_OF_DAY, 12);
+	 calendar.set(Calendar.HOUR_OF_DAY, 9);
 	 calendar.set(Calendar.MINUTE, 0);
 	 calendar.set(Calendar.SECOND, 0);
 	 weekShedule[0][0]=calendar.getTime();
-	 calendar.set(Calendar.HOUR_OF_DAY, 20);
+	 calendar.set(Calendar.HOUR_OF_DAY, 14);
 	 calendar.set(Calendar.MINUTE, 0);
 	 calendar.set(Calendar.SECOND, 0);
 	 weekShedule[0][1]=calendar.getTime();
 	 
 	 calendar.set(Calendar.DAY_OF_WEEK, 2);
-	 calendar.set(Calendar.HOUR_OF_DAY, 12);
+	 calendar.set(Calendar.HOUR_OF_DAY, 9);
 	 calendar.set(Calendar.MINUTE, 0);
 	 calendar.set(Calendar.SECOND, 0);
 	 weekShedule[1][0]=calendar.getTime();
-	 calendar.set(Calendar.HOUR_OF_DAY, 20);
+	 calendar.set(Calendar.HOUR_OF_DAY, 14);
 	 calendar.set(Calendar.MINUTE, 0);
 	 calendar.set(Calendar.SECOND, 0);
 	 weekShedule[1][1]=calendar.getTime();
 	 
 	 calendar.set(Calendar.DAY_OF_WEEK, 3);
-	 calendar.set(Calendar.HOUR_OF_DAY, 12);
+	 calendar.set(Calendar.HOUR_OF_DAY, 9);
 	 calendar.set(Calendar.MINUTE, 0);
 	 calendar.set(Calendar.SECOND, 0);
 	 weekShedule[2][0]=calendar.getTime();
-	 calendar.set(Calendar.HOUR_OF_DAY, 20);
+	 calendar.set(Calendar.HOUR_OF_DAY, 14);
 	 calendar.set(Calendar.MINUTE, 0);
 	 calendar.set(Calendar.SECOND, 0);
 	 weekShedule[2][1]=calendar.getTime();
 	 
 	 calendar.set(Calendar.DAY_OF_WEEK, 4);
-	 calendar.set(Calendar.HOUR_OF_DAY, 12);
+	 calendar.set(Calendar.HOUR_OF_DAY, 9);
 	 calendar.set(Calendar.MINUTE, 0);
 	 calendar.set(Calendar.SECOND, 0);
 	 weekShedule[3][0]=calendar.getTime();
-	 calendar.set(Calendar.HOUR_OF_DAY, 20);
+	 calendar.set(Calendar.HOUR_OF_DAY, 14);
 	 calendar.set(Calendar.MINUTE, 0);
 	 calendar.set(Calendar.SECOND, 0);
 	 weekShedule[3][1]=calendar.getTime();
 	 
 	 calendar.set(Calendar.DAY_OF_WEEK, 5);
-	 calendar.set(Calendar.HOUR_OF_DAY, 12);
+	 calendar.set(Calendar.HOUR_OF_DAY, 9);
 	 calendar.set(Calendar.MINUTE, 0);
 	 calendar.set(Calendar.SECOND, 0);
 	 weekShedule[4][0]=calendar.getTime();
-	 calendar.set(Calendar.HOUR_OF_DAY, 20);
+	 calendar.set(Calendar.HOUR_OF_DAY, 14);
 	 calendar.set(Calendar.MINUTE, 0);
 	 calendar.set(Calendar.SECOND, 0);
 	 weekShedule[4][1]=calendar.getTime();

@@ -71,7 +71,7 @@ public class MainWindow2 {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
-		frame = new JFrame("Uriel");
+		frame = new JFrame("Inna");
 		frameSize=new Dimension(screenSize.width-frameBorder, screenSize.height-frameBorder);
 		frame.setBounds(frameBorder,frameBorder,frameSize.width, frameSize.height);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

@@ -16,6 +16,7 @@ import java.awt.event.FocusEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.sql.SQLException;
+import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
@@ -466,8 +467,11 @@ public class NewOrderWindow extends JFrame{
 			try {	
 			long duration=Math.round(Float.parseFloat(execTimeField.getText())*3600000); 
 			dates= calendarController.getFreeDates(duration);
-			if (dates.size()>0) {estimatedCompDateField.setValue(dates.get(dates.size()-1).getStart());
-			                     estimatedCompTimeField.setValue(dates.get(dates.size()-1).getStart());}
+			if (dates.size()>0) {
+				estimatedCompDateField.setValue(dates.get(dates.size()-1).getStart());
+			    estimatedCompTimeField.setValue(dates.get(dates.size()-1).getStart());
+			    issueDateField.setValue(new Date(dates.get(dates.size()-1).getStart().getTime()+86400000));
+			}
 			else JOptionPane.showMessageDialog(null,"could not find a suitable date");
 			}
 			catch(RuntimeException r) {JOptionPane.showMessageDialog(null,"not valid value in Execution time");
@@ -609,8 +613,9 @@ public class NewOrderWindow extends JFrame{
 	 if (issueDateField.getValue()!=null)
 		 order.setIssueDate((Date) issueDateField.getValue());
 	 else order.setIssueDate(null);
+	 DateFormat dateFormat = new SimpleDateFormat("dd/MM/yy");
 	 for(Event i:dates )
-	  i.setDescription(order.getDescription().toString());
+	  i.setDescription(order.getDescription().toString()+" "+"готово до  "+dateFormat.format(order.getIssueDate()));
 		 // i.setName(order.getCustomer().toString()+ " "+ order.getTotalPrice());
 	 order.setEvents(dates);
 	}

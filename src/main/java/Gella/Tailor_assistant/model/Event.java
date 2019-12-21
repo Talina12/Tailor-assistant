@@ -20,6 +20,7 @@ public Event() {
 	orderId=0;
 	googleId=new String();
 	description = new String();
+	colorId="8";
 }
 
 public Event(Date start, long duration) {
@@ -92,11 +93,30 @@ public String getColorId() {
 	return colorId;
 }
 
-public void setColorId(String colorId) {
-	this.colorId = colorId;
+public void setColorId(Date date) {
+	String color="";
+	if (date!=null) {
+	long gap=date.getTime()-(this.start.getTime()+this.duration) ;
+	if (gap>259200000) color="9";
+        else 
+      	if (gap>172800000)color="7";
+      	else
+      	  if (gap>86400000) color="5";
+      	  else
+      		if (gap>0)  color ="4";
+      		else
+      			if(gap>-64800000) color="6";
+      			else color="11";
+        }
+     else color="10";
+	colorId=color;
 }
 
 public void setColorId() {
 	// TODO Auto-generated method stub
+}
+
+public void setColorId(String string) {
+	this.colorId=string;
 }
 }
