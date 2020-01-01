@@ -85,7 +85,7 @@ public class MainWindow2 {
 		hintWindow = new HintWindow();
 		
 		buttonSize= new Dimension(frame.getBounds().width/6,frame.getBounds().height/7);
-		newOrderButton = new JButton("Новый заказ");
+		newOrderButton = new JButton("New order");
 		int space=(frame.getBounds().width-buttonSize.width*3)/4;
 		int x=space;
 		int y=frame.getBounds().height/9;
@@ -98,7 +98,7 @@ public class MainWindow2 {
 		    	newOrderWindow.setVisible(true);
 			 }
 		});
-		updateOrderButton = new JButton("обновить заказ");
+		updateOrderButton = new JButton("Update order");
 		x=x+buttonSize.width+space;
 		updateOrderButton.setBounds(x, y, buttonSize.width, buttonSize.height);
 		updateOrderButton.setFont(new Font("Tahoma", Font.PLAIN, fontSize));
@@ -114,7 +114,7 @@ public class MainWindow2 {
 		frame.add(newOrderButton);
 		frame.add(updateOrderButton);
 		
-		synchronizeButton = new JButton("Синронизация");
+		synchronizeButton = new JButton("Synchronize");
 		x=x+buttonSize.width+space;
 		synchronizeButton.setBounds(x, y, buttonSize.width, buttonSize.height);
 		//synchronizeButton.setBounds(x, y, buttonSize.width, buttonSize.height);
