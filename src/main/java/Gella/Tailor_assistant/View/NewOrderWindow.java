@@ -15,6 +15,7 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.print.PrinterJob;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -204,6 +205,8 @@ public class NewOrderWindow extends JFrame{
 			@Override
 			public void replace(FilterBypass fb, int offset, int length, String string,AttributeSet attr) throws BadLocationException
 			{
+			  if (string==null) fb.remove(0,length);
+			  else {
 			  if (!Character.isDigit(string.charAt(0)))
 					Toolkit.getDefaultToolkit().beep();
 			  else
@@ -212,6 +215,7 @@ public class NewOrderWindow extends JFrame{
 				else 
 					if (offset<=12)
 					fb.insertString( offset, string, attr );
+			        }
 					}
 					} );
 		contentPane.add(cellphoneField);
@@ -260,7 +264,9 @@ public class NewOrderWindow extends JFrame{
 			@Override
 			public void replace(FilterBypass fb, int offset, int length, String string,AttributeSet attr) throws BadLocationException
 			{
-			  if (Character.isLetter(string.charAt(0)))
+			  if (string==null) fb.remove(0,length);
+			  else {
+				if (Character.isLetter(string.charAt(0)))
 					Toolkit.getDefaultToolkit().beep();
 			  else
 				if (offset==2||offset==6||offset==9)
@@ -268,6 +274,7 @@ public class NewOrderWindow extends JFrame{
 				else 
 					if (offset<=11)
 					fb.insertString( offset, string, attr );
+			  }
 					}
 					} );
 		contentPane.add(homePhoneField);
@@ -546,8 +553,22 @@ public class NewOrderWindow extends JFrame{
 			 else {
 				 setOrder(newOrder);
 				 int id= dbHandler.addOrder(newOrder);
+				 newOrder.setOrderNumber(id);
 				 for (Event ev: dbHandler.getEventsByOrderId(id))
-				   googleCalendarController.addEvent(ev);	 
+				   googleCalendarController.addEvent(ev);
+				 JOptionPane.showMessageDialog(null,"Номер заказа: "+id);
+				 int result= JOptionPane.showConfirmDialog(null, "Распечатать заказ?",null,JOptionPane.YES_NO_OPTION);
+				 if(result==JOptionPane.YES_OPTION) {
+				 PrinterJob printerJob=PrinterJob.getPrinterJob();
+				 if (printerJob!=null) {
+					 //print order
+					 printerJob.setPrintable(new PrintOrder(newOrder));
+						try{
+							printerJob.print();
+							}catch(Exception e){ log.severe(e.getMessage());}
+				 }
+				 else JOptionPane.showMessageDialog(null," Нет принтера для печати");
+				 }
 				 dispose();
 				 } 
 			}});
@@ -567,7 +588,9 @@ public class NewOrderWindow extends JFrame{
 		if (c!=null) {
 			firstNameField.setText(c.getFirstName());
 			lastNameField.setText(c.getLastName());
+			cellphoneField.setText(null);
 			cellphoneField.setText(c.getCellphone());
+			homePhoneField.setText(null);
 			homePhoneField.setText(c.getHomePhone());
 			}
 		}

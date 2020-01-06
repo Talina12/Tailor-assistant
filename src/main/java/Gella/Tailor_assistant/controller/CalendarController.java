@@ -125,7 +125,7 @@ public class CalendarController {
 			       if (freeTime.getDuration()<=0) break;
 			 }
 			}
-		if (freeTime.getDuration()>0) 
+		if (freeTime.getDuration()>Settings.getMinEvent()) 
 			{freeTimes.add(freeTime);
 		    notAdded=false;
 		    }

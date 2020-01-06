@@ -24,6 +24,12 @@ import java.util.GregorianCalendar;
  private static final java.io.File DATA_STORE_DIR =
 	      new java.io.File(System.getProperty("user.dir"), ".store/"+APPLICATION_NAME);
  private static final long minEvent=900000;
+ private  final String ACCOUNT_SID =
+         " ";
+ private  final String AUTH_TOKEN =
+         " ";
+ private final String PHONE_NUMBER="ZigZag";
+ private static final String USER_NAME = "Inna";
  
  public static synchronized Settings getInstance() throws SQLException {
      if (instance == null)
@@ -140,6 +146,22 @@ public static java.io.File getDataStoreDir() {
 
 public static long getMinEvent() {
 	return minEvent;
+}
+
+public String getACCOUNT_SID() {
+	return ACCOUNT_SID;
+}
+
+public String getAUTH_TOKEN() {
+	return AUTH_TOKEN;
+}
+
+public String getPHONE_NUMBER() {
+	return PHONE_NUMBER;
+}
+
+public static String getUserName() {
+	return USER_NAME;
 }
 
 

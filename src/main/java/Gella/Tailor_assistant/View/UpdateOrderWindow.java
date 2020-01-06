@@ -62,6 +62,7 @@ import Gella.Tailor_assistant.model.Event;
 import Gella.Tailor_assistant.model.Order;
 import Gella.Tailor_assistant.model.OrderStatus;
 import Gella.Tailor_assistant.model.Settings;
+import Gella.Tailor_assistant.controller.SmsSender;;
 
 public class UpdateOrderWindow extends JFrame {
 
@@ -114,6 +115,7 @@ public class UpdateOrderWindow extends JFrame {
 	private GoogleCalendarController googleCalendarController;
 	private Dimension frameSize;
 	private boolean rescheduled;
+	private boolean sendMes;
 	
 	
 	/**
@@ -474,6 +476,21 @@ public class UpdateOrderWindow extends JFrame {
 			 }
 			 else dbHandler.updateOrderwithoutEvents(order);
 			 googleCalendarController.synchronize();
+			 int result=-1;
+			 if (sendMes) { result = JOptionPane.showConfirmDialog(null, "Отправить сообщение?",null,JOptionPane.YES_NO_OPTION);
+			 if(result==JOptionPane.YES_OPTION) {
+			    String cellNum=order.getCustomer().getCellphone();
+				if ((cellNum!=null)&&(cellNum.length()==13)) {
+					 String[] str=cellNum.split("-");
+					 cellNum=str[0]+str[1]+str[2]+str[3];
+					 System.out.println(cellNum);
+					 SmsSender s;
+					 s=new SmsSender(settings.getACCOUNT_SID(),settings.getAUTH_TOKEN(),settings.getPHONE_NUMBER());
+					 s.send(".שלום, הזמנה שלך מוכנה "+'\n'+"בברכה זיגזג אומנות התפירה", cellNum);
+					 }
+				else JOptionPane.showMessageDialog(null," Нет номера для отправки сообщения");
+			 }
+			 }
 			 dispose();
 				
 			}});
@@ -559,13 +576,17 @@ private ActionListener tableCellActionListener = new ActionListener() {
 	 newOrder.setTryOn(((Integer) tryOnSpinner.getValue()).intValue());
 	 newOrder.setPaid(Float.parseFloat(paidField.getText()));
 	 newOrder.setExecTime(Float.parseFloat(execTimeField.getText()));
-	 newOrder.setStatus(OrderStatus.valueOfTitle((String)statusComboBox.getSelectedItem()));
-	 // if the order is ready we must delete all events of the order
-	 if(newOrder.getStatus()==OrderStatus.READY||newOrder.getStatus()==OrderStatus.CLOSED) 
-	 {dates=null;
+	 OrderStatus newS=OrderStatus.valueOfTitle((String)statusComboBox.getSelectedItem());
+	// if the order status is changed and it  is ready we must delete all events of the order
+	 if (newS!=order.getStatus()&&(newS==OrderStatus.READY||newS==OrderStatus.CLOSED))
+	 {newOrder.setStatus(OrderStatus.valueOfTitle((String)statusComboBox.getSelectedItem()));
+	  dates=null;
 	  newOrder.setEvents(null);
 	  rescheduled=true;
-	 }
+	  if (newOrder.getStatus()==OrderStatus.READY) sendMes=true;
+	  }
+	 else
+	  newOrder.setStatus(OrderStatus.valueOfTitle((String)statusComboBox.getSelectedItem()));
 	 if (fitDayField.getValue()!=null) 
 		 newOrder.setFitDay((Date) fitDayField.getValue());
 	 else newOrder.setFitDay(null);

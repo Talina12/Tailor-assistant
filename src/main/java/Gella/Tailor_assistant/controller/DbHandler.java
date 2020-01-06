@@ -889,5 +889,50 @@ return 0;
 }
 return order.getOrderNumber();
 }
+
+public ArrayList<Order> getOrdersByCustId(int custId) {
+	 String sql ="SELECT Orders.id orders_id, id_customer, rec_date, description, total_price,estimated_comp_day, "
+				+ "try_on, paid, exec_time, status,fit_day, issue_date, first_name, last_name, "
+				+ "cellphone,home_phone  "
+				+ "FROM Orders INNER JOIN Customers on Customers.id=Orders.id_customer"
+		 		+ " WHERE Orders.id_customer = ?";
+	
+ try ( PreparedStatement stat  = this.connect().prepareStatement(sql)){
+  // set the value
+ stat.setInt(1,custId);
+ ResultSet rs  = stat.executeQuery();
+ Order order=null;
+ ArrayList<Order> orders=new ArrayList<Order>();
+ // loop through the result set
+ while (rs.next()) {
+    order = new Order();
+    Customer customer = new Customer();
+    customer.setCellphone((rs.getString("cellphone")));
+    customer.setFirstName(rs.getString("first_name"));
+    customer.setHomePhone(rs.getString("home_phone"));
+    customer.setId(rs.getInt("id_customer"));
+    customer.setLastName(rs.getString("last_name"));
+    order.setCustomer(customer);
+    order.setDescription(rs.getString("description"));
+    order.setEstimatedCompTime(rs.getDate("estimated_comp_day"));
+    order.setExecTime(rs.getFloat("exec_time"));
+    order.setFitDay(rs.getDate("fit_day"));
+    order.setIssueDate(rs.getDate("issue_date"));
+    order.setOrderNumber(rs.getInt("orders_id"));
+    order.setPaid(rs.getInt("paid"));
+    order.setRecDate(rs.getDate("rec_date"));
+    order.setStatus(OrderStatus.valueOf(rs.getString("status")));
+    order.setTotalPrice(rs.getInt("total_price"));
+    order.setTryOn(rs.getInt("try_on"));
+    order.setEvents(getEventsByOrderId(order.getOrderNumber()));
+    orders.add(order);
+    }
+return orders; 
+} catch (SQLException e) {
+ System.out.println(e.getMessage());
+ e.printStackTrace();
+}
+return null;
+}
 }
 
